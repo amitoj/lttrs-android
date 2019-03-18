@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_nav"
+    app:startDestination="@+id/inbox">
+
+    <fragment
+        android:id="@+id/inbox"
+        android:name="rs.ltt.android.ui.fragment.MainMailboxQueryFragment"
+        android:label="inbox"
+        tools:layout="@layout/fragment_thread_list">
+        <action
+            android:id="@+id/action_inbox_to_mailbox"
+            app:destination="@+id/mailbox"
+            app:popUpTo="@+id/inbox" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/mailbox"
+        android:name="rs.ltt.android.ui.fragment.MailboxQueryFragment"
+        android:label="mailbox"
+        tools:layout="@layout/fragment_thread_list">
+        <argument
+            android:name="mailbox"
+            app:argType="string"
+            app:nullable="false" />
+        <action
+            android:id="@+id/action_mailbox_to_mailbox"
+            app:destination="@+id/mailbox"
+            app:popUpTo="@+id/inbox" />
+        <action
+            android:id="@+id/action_mailbox_to_inbox"
+            app:destination="@+id/inbox"
+            app:popUpTo="@+id/inbox"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+</navigation>

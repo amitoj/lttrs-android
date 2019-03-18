@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="thread"
+            type="rs.ltt.android.entity.ThreadOverviewItem" />
+    </data>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:minHeight="88dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:background="?selectableItemBackground"
+        android:clickable="true">
+        <ImageView
+            android:id="@+id/avatar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"/>
+
+        <TextView
+            android:layout_toEndOf="@id/avatar"
+            android:id="@+id/froms"
+            style="@style/Base.TextAppearance.AppCompat.Subhead"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{thread.getFroms}"
+            android:maxLines="1"
+            tools:text="Juliet, Mercutio, Benvolio"
+            app:firstBaselineToTopHeight="28dp" />
+
+        <TextView
+            android:id="@+id/subject"
+            android:layout_toEndOf="@id/avatar"
+            style="@style/Base.TextAppearance.AppCompat.Body1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/froms"
+            android:text="@{thread.subject}"
+            tools:text="The awesome subject line"
+            android:typeface='@{thread.everyHasSeenKeyword() ? "normal" : "bold"}'
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_toStartOf="@+id/star_toggle"
+            app:firstBaselineToTopHeight="20sp" />
+
+        <TextView
+            android:id="@+id/thread_count"
+            style="@style/Base.TextAppearance.AppCompat.Body1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@id/froms"
+            android:layout_marginStart="8sp"
+            android:layout_toEndOf="@id/froms"
+            android:layout_toStartOf="@id/date"
+            android:maxLines="1"
+            android:text="@{thread.getCount}" />
+
+        <TextView
+            android:id="@+id/date"
+            style="@style/Base.TextAppearance.AppCompat.Caption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@id/froms"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="8sp"
+            android:maxLines="1"
+            tools:text="Mar 24"
+            android:text="@{thread.getReceivedAt}" />
+
+        <TextView
+            android:id="@+id/preview"
+            style="@style/Base.TextAppearance.AppCompat.Body1"
+            android:layout_toEndOf="@id/avatar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/subject"
+            android:layout_toStartOf="@+id/star_toggle"
+            android:maxLines="1"
+            android:text="@{thread.preview}"
+            android:ellipsize="end"
+            tools:text="A short excerpt of the full email which fill the entire line like in this example" />
+        <ImageView
+            android:id="@+id/star_toggle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8sp"
+            tools:src="@drawable/ic_star_border_black_24dp"
+            tools:alpha="0.57"
+            app:isFlagged="@{thread.isFlagged()}"
+            android:layout_alignParentEnd="true"
+            android:layout_alignBaseline="@id/preview"
+            android:baselineAlignBottom="true"/>
+    </RelativeLayout>
+</layout>
