@@ -1,8 +1,11 @@
 package rs.ltt.android.database.dao;
 
+import android.util.Log;
+
 import java.util.List;
 
 import androidx.room.Dao;
+import androidx.room.Ignore;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Transaction;
@@ -15,6 +18,8 @@ import rs.ltt.android.entity.EntityType;
 import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.common.entity.TypedState;
 import rs.ltt.jmap.mua.cache.Update;
+
+import static androidx.room.OnConflictStrategy.IGNORE;
 
 @Dao
 public abstract class EmailDao extends AbstractEntityDao<Email> {
@@ -34,24 +39,31 @@ public abstract class EmailDao extends AbstractEntityDao<Email> {
     @Insert
     abstract void insertEmailAddresses(List<EmailEmailAddressEntity> entities);
 
-    @Insert
+    @Insert()
     abstract void insertMailboxes(List<EmailMailboxEntity> entities);
 
-    @Insert
+    @Insert()
     abstract void insertKeywords(List<EmailKeywordEntity> entities);
 
     @Transaction
     public void set(final Email[] emails, EntityStateEntity entityState) {
         //TODO delete old email
-        insertEmails(emails);
+        if (emails.length > 0) {
+            insertEmails(emails);
+        }
         insert(entityState);
     }
 
     @Transaction
     public void add(final TypedState<Email> expectedState, Email[] email) {
-        insertEmails(email);
+        if (email.length > 0) {
+            insertEmails(email);
+        }
         throwOnCacheConflict(EntityType.EMAIL, expectedState);
     }
+
+    @Query("SELECT EXISTS(SELECT 1 FROM email WHERE id=:emailId)")
+    protected abstract boolean exists(String emailId);
 
     private void insertEmails(final Email[] emails) {
         for (Email email : emails) {
@@ -63,9 +75,21 @@ public abstract class EmailDao extends AbstractEntityDao<Email> {
     }
 
     public void updateEmails(Update<Email> update, String[] updatedProperties) {
-        insertEmails(update.getCreated());
+        final String newState = update.getNewTypedState().getState();
+        if (newState != null && newState.equals(getState(EntityType.EMAIL))) {
+            Log.d("lttrs","nothing to do. emails already at newest state");
+            return;
+        }
+        final Email[] created = update.getCreated();
+        if (created.length > 0) {
+            insertEmails(created);
+        }
         if (updatedProperties != null) {
             for (Email email : update.getUpdated()) {
+                if (!exists(email.getId())) {
+                    Log.d("lttrs","skipping updates to email "+email.getId()+" because we don’t have that");
+                    continue;
+                }
                 for (String property : updatedProperties) {
                     switch (property) {
                         case "keywords":

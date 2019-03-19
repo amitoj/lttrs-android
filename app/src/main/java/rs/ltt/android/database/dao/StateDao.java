@@ -41,10 +41,19 @@ public abstract class StateDao {
     @Query("select state from `query` where queryString=:queryString")
     abstract String getQueryState(String queryString);
 
+    @Query("select emailId from `query` join query_item on `query`.id = queryId  where queryString=:queryString order by position desc limit 1")
+    abstract String getUpTo(String queryString);
+
     @Transaction
     public QueryStateWrapper getQueryStateWrapper(String queryString) {
         final String queryState = getQueryState(queryString);
         final ObjectsState objectsState = getObjectsState();
-        return new QueryStateWrapper(queryState, objectsState);
+        final String upTo;
+        if (queryState == null) {
+            upTo = null;
+        } else {
+            upTo = getUpTo(queryString);
+        }
+        return new QueryStateWrapper(queryState, upTo, objectsState);
     }
 }

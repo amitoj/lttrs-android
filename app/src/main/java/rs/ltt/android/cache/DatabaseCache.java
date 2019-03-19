@@ -30,6 +30,7 @@ import rs.ltt.jmap.mua.cache.QueryStateWrapper;
 import rs.ltt.jmap.mua.cache.QueryUpdate;
 import rs.ltt.jmap.mua.cache.Update;
 import rs.ltt.jmap.mua.entity.QueryResultItem;
+import rs.ltt.jmap.mua.util.QueryResult;
 
 public class DatabaseCache implements Cache {
 
@@ -102,7 +103,7 @@ public class DatabaseCache implements Cache {
     @Override
     public void updateThreads(Update<Thread> update) throws CacheWriteException {
         database.threadDao().update(update);
-        Log.d("lttrs", "updated some threads");
+        Log.d("lttrs", "updated some threads "+update.toString());
     }
 
     @Override
@@ -133,9 +134,14 @@ public class DatabaseCache implements Cache {
     }
 
     @Override
-    public void setQueryResult(String queryString, TypedState<Email> queryState, QueryResultItem[] items, TypedState<Email> emailTypedState) {
-        database.queryDao().set(queryString, queryState.getState(), items, emailTypedState);
+    public void setQueryResult(String queryString, QueryResult<Email> queryResult) {
+        database.queryDao().set(queryString, queryResult);
         Log.d("lttrs", "setting query result for query string '" + queryString + "'");
+    }
+
+    @Override
+    public void addQueryResult(String queryString, QueryResult<Email> queryResult) throws CacheWriteException, CacheConflictException {
+        database.queryDao().add(queryString, queryResult);
     }
 
     @Override

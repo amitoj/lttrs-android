@@ -30,8 +30,7 @@ import rs.ltt.jmap.common.entity.Keyword;
 
 public class ThreadOverviewItem {
 
-    public long position;
-
+    public String emailId;
     public String threadId;
 
     @Relation(parentColumn = "threadId", entityColumn = "threadId", entity = EmailEntity.class)

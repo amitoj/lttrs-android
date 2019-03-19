@@ -1,5 +1,7 @@
 package rs.ltt.android.database.dao;
 
+import android.util.Log;
+
 import java.util.List;
 
 import androidx.room.Dao;
@@ -26,19 +28,26 @@ public abstract class ThreadDao extends AbstractEntityDao<Thread> {
     @Insert
     abstract void insert(List<ThreadItemEntity> entities);
 
+    @Query("delete from thread_item where threadId=:threadId")
+    abstract void deleteAllThreadItem(String threadId);
+
     @Delete
     abstract void delete(ThreadEntity thread);
 
     @Transaction
     public void set(Thread[] threads, EntityStateEntity entityState) {
         //TODO delete old
-        insertThreads(threads);
+        if (threads.length > 0) {
+            insertThreads(threads);
+        }
         insert(entityState);
     }
 
     @Transaction
     public void add(final TypedState<Thread> expectedState, Thread[] threads) {
-        insertThreads(threads);
+        if (threads.length > 0) {
+            insertThreads(threads);
+        }
         throwOnCacheConflict(EntityType.THREAD, expectedState);
     }
 
@@ -49,13 +58,27 @@ public abstract class ThreadDao extends AbstractEntityDao<Thread> {
         }
     }
 
+    @Query("SELECT EXISTS(SELECT 1 FROM thread WHERE threadId=:threadId)")
+    protected abstract boolean exists(String threadId);
+
     @Transaction
     public void update(Update<Thread> update) {
-        insertThreads(update.getCreated());
+        final String newState = update.getNewTypedState().getState();
+        if (newState != null && newState.equals(getState(EntityType.THREAD))) {
+            Log.d("lttrs","nothing to do. threads already at newest state");
+            return;
+        }
+        Thread[] created = update.getCreated();
+        if (created.length > 0) {
+            insertThreads(created);
+        }
         for (Thread thread : update.getUpdated()) {
-            delete(ThreadEntity.of(thread));
-            insert(ThreadEntity.of(thread));
-            insert(ThreadItemEntity.of(thread));
+            if (exists(thread.getId())) {
+                deleteAllThreadItem(thread.getId());
+                insert(ThreadItemEntity.of(thread));
+            } else {
+                Log.d("lttrs","skipping update to thread "+thread.getId());
+            }
         }
         for(String id : update.getDestroyed()) {
             delete(ThreadEntity.of(id));

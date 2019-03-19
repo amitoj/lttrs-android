@@ -40,11 +40,11 @@ public class QueryItemEntity {
     }
 
 
-    public static List<QueryItemEntity> of(final Long queryId, final QueryResultItem[] items) {
+    public static List<QueryItemEntity> of(final Long queryId, final QueryResultItem[] items, final int offset) {
         ImmutableList.Builder<QueryItemEntity> builder = new ImmutableList.Builder<>();
         for (int i = 0; i < items.length; ++i) {
             QueryResultItem item = items[i];
-            builder.add(of(queryId, i, item));
+            builder.add(of(queryId, i + offset, item));
         }
         return builder.build();
     }

@@ -3,10 +3,12 @@ package rs.ltt.android.repository;
 import android.app.Application;
 import android.util.Log;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
@@ -28,8 +30,10 @@ public class QueryRepository {
     private final DatabaseCache muaCache;
 
     private final Set<String> runningQueries = new HashSet<>();
+    private final Set<String> runningPagingRequests = new HashSet<>();
 
     private MutableLiveData<Set<String>> runningQueriesLiveData = new MutableLiveData<>(runningQueries);
+    private MutableLiveData<Set<String>> runningPagingRequestsLiveData = new MutableLiveData<>(runningPagingRequests);
 
 
     public QueryRepository(Application application) {
@@ -42,13 +46,14 @@ public class QueryRepository {
                 .setBoundaryCallback(new PagedList.BoundaryCallback<ThreadOverviewItem>() {
                     @Override
                     public void onZeroItemsLoaded() {
-                        refresh(query);
+                        refresh(query); //conceptually in terms of loading indicators this is more of a page request
                         super.onZeroItemsLoaded();
                     }
 
                     @Override
                     public void onItemAtEndLoaded(@NonNull ThreadOverviewItem itemAtEnd) {
-                        Log.d("lttrs","onItemAtEndLoaded("+itemAtEnd.threadId+")");
+                        Log.d("lttrs","onItemAtEndLoaded("+itemAtEnd.emailId+")");
+                        requestNextPage(query,itemAtEnd.emailId);
                         super.onItemAtEndLoaded(itemAtEnd);
                     }
                 })
@@ -63,10 +68,14 @@ public class QueryRepository {
 
     public void refresh(final EmailQuery emailQuery) {
         final String queryString = emailQuery.toQueryString();
-        synchronized (runningQueries) {
+        synchronized (this) {
             if (!runningQueries.add(queryString)) {
                 Log.d("lttrs","skipping refresh since already running");
                 return;
+            }
+            if (runningPagingRequests.contains(queryString)) {
+                //even though this refresh call is only implicit through the pageRequest we want to display something nice for the user
+                runningQueries.add(queryString);
             }
 
         }
@@ -74,12 +83,50 @@ public class QueryRepository {
                 .password(Credentials.password)
                 .username(Credentials.username)
                 .cache(this.muaCache)
+                .queryPageSize(20)
                 .build();
         mua.query(emailQuery).addListener(() -> {
             synchronized (runningQueries) {
                 runningQueries.remove(queryString);
             }
             runningQueriesLiveData.postValue(runningQueries);
+        }, MoreExecutors.directExecutor());
+    }
+
+
+    public void requestNextPage(final EmailQuery emailQuery, String afterEmailId) {
+        final String queryString = emailQuery.toQueryString();
+        synchronized (this) {
+            if (!runningPagingRequests.add(queryString)) {
+                Log.d("lttrs","skipping paging request since already running");
+                return;
+            }
+        }
+        final Mua mua = Mua.builder()
+                .username(Credentials.username)
+                .password(Credentials.password)
+                .cache(this.muaCache)
+                .queryPageSize(20)
+                .build();
+        ListenableFuture<Boolean> hadResults = mua.query(emailQuery, afterEmailId);
+        hadResults.addListener(() -> {
+            final boolean modifiedImpliciedRefresh;
+            synchronized (this) {
+                runningPagingRequests.remove(queryString);
+                modifiedImpliciedRefresh = runningQueries.remove(queryString);
+            }
+            runningPagingRequestsLiveData.postValue(runningPagingRequests);
+            if (modifiedImpliciedRefresh) {
+                runningQueriesLiveData.postValue(runningQueries);
+            }
+            try {
+                Log.d("lttrs", "had items=" + hadResults.get());
+            } catch (ExecutionException e) {
+                Throwable cause = e.getCause();
+                Log.d("lttrs","error retrieving the next page",cause);
+            } catch (Exception e) {
+                Log.d("lttrs","error paging ",e);
+            }
         }, MoreExecutors.directExecutor());
     }
 

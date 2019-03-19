@@ -1,5 +1,7 @@
 package rs.ltt.android.database.dao;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,17 +57,26 @@ public abstract class MailboxDao extends AbstractEntityDao<Mailbox> {
     @Transaction
     public void set(List<MailboxEntity> mailboxEntities, EntityStateEntity entityStateEntity) {
         //TODO delete old
-        insert(mailboxEntities);
+        if (mailboxEntities.size() > 0) {
+            insert(mailboxEntities);
+        }
         insert(entityStateEntity);
     }
 
     @Transaction
     public void update(final Update<Mailbox> update, final String[] updatedProperties) {
-        List<MailboxEntity> createdEntities = new ArrayList<>();
+        final String newState = update.getNewTypedState().getState();
+        if (newState != null && newState.equals(getState(EntityType.MAILBOX))) {
+            Log.d("lttrs","nothing to do. mailboxes already at newest state");
+            return;
+        }
+        final List<MailboxEntity> createdEntities = new ArrayList<>();
         for (Mailbox mailbox : update.getCreated()) {
             createdEntities.add(MailboxEntity.of(mailbox));
         }
-        insert(createdEntities);
+        if (createdEntities.size() > 0) {
+            insert(createdEntities);
+        }
         if (updatedProperties == null) {
             List<MailboxEntity> updatedEntities = new ArrayList<>();
             for (Mailbox mailbox : update.getUpdated()) {
