@@ -96,7 +96,7 @@ public class ThreadOverviewItem {
                         from = new From(name, seen);
                         froms.put(emailAddress.email, from);
                     } else {
-                        from.seen |= seen;
+                        from.seen &= seen;
                     }
                 }
             }
