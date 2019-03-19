@@ -34,13 +34,20 @@ public abstract class ThreadDao extends AbstractEntityDao<Thread> {
     @Delete
     abstract void delete(ThreadEntity thread);
 
+    @Query("delete from thread")
+    abstract void deleteAll();
+
     @Transaction
-    public void set(Thread[] threads, EntityStateEntity entityState) {
-        //TODO delete old
+    public void set(Thread[] threads, String state) {
+        if (state != null && state.equals(getState(EntityType.THREAD))) {
+            Log.d("lttrs","nothing to do. threads with this state have already been set");
+            return;
+        }
+        deleteAll();
         if (threads.length > 0) {
             insertThreads(threads);
         }
-        insert(entityState);
+        insert(new EntityStateEntity(EntityType.THREAD, state));
     }
 
     @Transaction

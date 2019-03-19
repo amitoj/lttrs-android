@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import rs.ltt.android.R;
@@ -49,6 +50,7 @@ public abstract class AbstractQueryFragment extends Fragment {
         binding.threadList.setAdapter(threadOverviewAdapter);
         binding.setViewModel(viewModel);
         binding.setLifecycleOwner(getViewLifecycleOwner());
+        viewModel.isRunningPagingRequest().observe(this, threadOverviewAdapter::setLoading);
         return binding.getRoot();
     }
 

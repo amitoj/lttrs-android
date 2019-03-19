@@ -19,6 +19,8 @@ public abstract class AbstractQueryViewModel extends AndroidViewModel {
 
     private LiveData<Boolean> refreshing;
 
+    private LiveData<Boolean> runningPagingRequest;
+
     AbstractQueryViewModel(@NonNull Application application) {
         super(application);
         this.queryRepository = new QueryRepository(application);
@@ -27,6 +29,7 @@ public abstract class AbstractQueryViewModel extends AndroidViewModel {
     void init() {
         this.threads = Transformations.switchMap(getQuery(), queryRepository::getThreadOverviewItems);
         this.refreshing = Transformations.switchMap(getQuery(), queryRepository::isRunningQueryFor);
+        this.runningPagingRequest = Transformations.switchMap(getQuery(), queryRepository::isRunningPagingRequestFor);
     }
 
     public LiveData<Boolean> isRefreshing() {
@@ -35,6 +38,14 @@ public abstract class AbstractQueryViewModel extends AndroidViewModel {
             throw new IllegalStateException("LiveData for refreshing not initialized. Forgot to call init()?");
         }
         return refreshing;
+    }
+
+    public LiveData<Boolean> isRunningPagingRequest() {
+        final LiveData<Boolean> paging = this.runningPagingRequest;
+        if (paging == null) {
+            throw new IllegalStateException("LiveData for paging not initialized. Forgot to call init()?");
+        }
+        return paging;
     }
 
     public LiveData<PagedList<ThreadOverviewItem>> getThreadOverviewItems() {

@@ -69,8 +69,7 @@ public class DatabaseCache implements Cache {
         for (Mailbox mailbox : mailboxes) {
             mailboxEntities.add(MailboxEntity.of(mailbox));
         }
-        final EntityStateEntity entityState = new EntityStateEntity(EntityType.MAILBOX, mailboxTypedState.getState());
-        database.mailboxDao().set(mailboxEntities, entityState);
+        database.mailboxDao().set(mailboxEntities, mailboxTypedState.getState());
     }
 
     @Override
@@ -89,8 +88,7 @@ public class DatabaseCache implements Cache {
 
     @Override
     public void setThreads(TypedState<Thread> threadTypedState, Thread[] threads) {
-        final EntityStateEntity entityState = new EntityStateEntity(EntityType.THREAD, threadTypedState.getState());
-        database.threadDao().set(threads, entityState);
+        database.threadDao().set(threads, threadTypedState.getState());
         Log.d("lttrs", "saving " + threads.length + " threads");
     }
 
@@ -108,7 +106,7 @@ public class DatabaseCache implements Cache {
 
     @Override
     public void setEmails(TypedState<Email> emailTypedState, Email[] emails) {
-        database.emailDao().set(emails, new EntityStateEntity(EntityType.EMAIL, emailTypedState.getState()));
+        database.emailDao().set(emails, emailTypedState.getState());
         Log.d("lttrs", "setting " + emails.length + " emails");
     }
 

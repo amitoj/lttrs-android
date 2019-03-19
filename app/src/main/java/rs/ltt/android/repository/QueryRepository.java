@@ -53,7 +53,7 @@ public class QueryRepository {
                 .setBoundaryCallback(new PagedList.BoundaryCallback<ThreadOverviewItem>() {
                     @Override
                     public void onZeroItemsLoaded() {
-                        refresh(query); //conceptually in terms of loading indicators this is more of a page request
+                        requestNextPage(query, null); //conceptually in terms of loading indicators this is more of a page request
                         super.onZeroItemsLoaded();
                     }
 
@@ -70,7 +70,10 @@ public class QueryRepository {
 
     public LiveData<Boolean> isRunningQueryFor(final EmailQuery query) {
         return Transformations.map(runningQueriesLiveData, queryStrings -> queryStrings.contains(query.toQueryString()));
+    }
 
+    public LiveData<Boolean> isRunningPagingRequestFor(final EmailQuery query) {
+        return Transformations.map(runningPagingRequestsLiveData, queryStrings -> queryStrings.contains(query.toQueryString()));
     }
 
     public void refresh(final EmailQuery emailQuery) {
@@ -83,6 +86,9 @@ public class QueryRepository {
             if (runningPagingRequests.contains(queryString)) {
                 //even though this refresh call is only implicit through the pageRequest we want to display something nice for the user
                 runningQueries.add(queryString);
+                runningQueriesLiveData.postValue(runningQueries);
+                Log.d("lttrs", "skipping refresh since we are running a page request");
+                return;
             }
 
         }
@@ -102,20 +108,26 @@ public class QueryRepository {
                 Log.d("lttrs", "skipping paging request since already running");
                 return;
             }
+            runningPagingRequestsLiveData.postValue(runningPagingRequests);
         }
-        ListenableFuture<Boolean> hadResults = mua.query(emailQuery, afterEmailId);
+        final ListenableFuture hadResults;
+        if (afterEmailId == null) {
+            hadResults = mua.query(emailQuery);
+        } else {
+            hadResults = mua.query(emailQuery, afterEmailId);
+        }
         hadResults.addListener(() -> {
-            final boolean modifiedImpliciedRefresh;
+            final boolean modifiedImplicitRefresh;
             synchronized (this) {
                 runningPagingRequests.remove(queryString);
-                modifiedImpliciedRefresh = runningQueries.remove(queryString);
+                modifiedImplicitRefresh = runningQueries.remove(queryString);
             }
             runningPagingRequestsLiveData.postValue(runningPagingRequests);
-            if (modifiedImpliciedRefresh) {
+            if (modifiedImplicitRefresh) {
                 runningQueriesLiveData.postValue(runningQueries);
             }
             try {
-                Log.d("lttrs", "had items=" + hadResults.get());
+                Log.d("lttrs", "requestNextPageResult=" + hadResults.get());
             } catch (ExecutionException e) {
                 Throwable cause = e.getCause();
                 Log.d("lttrs", "error retrieving the next page", cause);

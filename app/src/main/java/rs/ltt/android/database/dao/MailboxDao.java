@@ -54,13 +54,20 @@ public abstract class MailboxDao extends AbstractEntityDao<Mailbox> {
     @Query("delete from mailbox where id=:id")
     public abstract void delete(String id);
 
+    @Query("delete from mailbox")
+    public abstract void deleteAll();
+
     @Transaction
-    public void set(List<MailboxEntity> mailboxEntities, EntityStateEntity entityStateEntity) {
-        //TODO delete old
+    public void set(List<MailboxEntity> mailboxEntities, String state) {
+        if (state != null && state.equals(getState(EntityType.MAILBOX))) {
+            Log.d("lttrs","nothing to do. mailboxes with this state have already been set");
+            return;
+        }
+        deleteAll();
         if (mailboxEntities.size() > 0) {
             insert(mailboxEntities);
         }
-        insert(entityStateEntity);
+        insert(new EntityStateEntity(EntityType.MAILBOX, state));
     }
 
     @Transaction

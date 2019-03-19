@@ -47,7 +47,7 @@ public class ThreadOverviewItem {
 
     @Relation(parentColumn = "threadId", entityColumn = "threadId", entity = EmailEntity.class)
     public List<Email> emails;
-    
+
     @Relation(parentColumn = "threadId", entityColumn = "threadId")
     public List<ThreadItemEntity> threadItemEntities;
 
