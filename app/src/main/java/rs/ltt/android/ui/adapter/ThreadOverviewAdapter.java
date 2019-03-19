@@ -1,5 +1,6 @@
 package rs.ltt.android.ui.adapter;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -27,7 +28,10 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
 
             @Override
             public boolean areContentsTheSame(@NonNull ThreadOverviewItem oldItem, @NonNull ThreadOverviewItem newItem) {
-                return false;
+                if (!oldItem.equals(newItem)) {
+                    Log.d("lttrs",oldItem.getSubject()+" was not same as new item");
+                }
+                return oldItem.equals(newItem);
             }
         });
     }

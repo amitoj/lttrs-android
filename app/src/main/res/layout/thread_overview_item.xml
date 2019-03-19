@@ -32,7 +32,7 @@
             style="@style/Base.TextAppearance.AppCompat.Subhead"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{thread.getFroms}"
+            android:text="@{thread.getFromValues()}"
             android:maxLines="1"
             tools:text="Juliet, Mercutio, Benvolio"
             app:firstBaselineToTopHeight="28dp" />

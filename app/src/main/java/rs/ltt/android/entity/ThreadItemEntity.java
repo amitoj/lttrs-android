@@ -24,16 +24,24 @@ public class ThreadItemEntity {
     @NonNull
     public String emailId;
 
-    public ThreadItemEntity(@NonNull String threadId, @NonNull String emailId) {
+    public Integer position;
+
+    public ThreadItemEntity(@NonNull String threadId, @NonNull String emailId, @NonNull Integer position) {
         this.threadId = threadId;
         this.emailId = emailId;
+        this.position = position;
     }
 
 
+    public int getPosition() {
+        return this.position;
+    }
+
     public static List<ThreadItemEntity> of(final Thread thread) {
         final List<ThreadItemEntity> entities = new ArrayList<>();
-        for (final String emailId : thread.getEmailIds()) {
-            entities.add(new ThreadItemEntity(thread.getId(), emailId));
+        List<String> emailIds = thread.getEmailIds();
+        for(int i = 0; i < emailIds.size(); ++i) {
+            entities.add(new ThreadItemEntity(thread.getId(), emailIds.get(i), i));
         }
         return entities;
     }

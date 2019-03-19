@@ -10,53 +10,65 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
 
 import java.security.Key;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 import androidx.core.content.ContextCompat;
 import androidx.core.widget.ImageViewCompat;
 import androidx.databinding.BindingAdapter;
+import androidx.room.Ignore;
 import androidx.room.Relation;
 import rs.ltt.android.R;
 import rs.ltt.jmap.common.entity.Keyword;
 
 public class ThreadOverviewItem {
 
+    @Ignore
+    private final AtomicReference<Map<String, From>> fromMap = new AtomicReference<>();
+    @Ignore
+    private final AtomicReference<List<Email>> orderedEmails = new AtomicReference<>();
+
     public String emailId;
     public String threadId;
 
     @Relation(parentColumn = "threadId", entityColumn = "threadId", entity = EmailEntity.class)
     public List<Email> emails;
-
-    //TODO grap threadItem to get hold of position
+    
     @Relation(parentColumn = "threadId", entityColumn = "threadId")
     public List<ThreadItemEntity> threadItemEntities;
 
 
     public String getPreview() {
-        final Email email = Iterables.getLast(emails, null);
+        final Email email = Iterables.getLast(getOrderedEmails(), null);
         return email == null ? "(no preview)" : email.preview;
     }
 
     public String getSubject() {
-        final Email email = Iterables.getFirst(emails, null);
+        final Email email = Iterables.getFirst(getOrderedEmails(), null);
         return email == null ? "(no subject)" : email.subject;
     }
 
     public Date getReceivedAt() {
-        final Email email = Iterables.getLast(emails, null);
+        final Email email = Iterables.getLast(getOrderedEmails(), null);
         return email == null ? null : email.receivedAt;
     }
 
     public boolean everyHasSeenKeyword() {
+        final List<Email> emails = getOrderedEmails();
         for (Email email : emails) {
             if (!email.keywords.contains(Keyword.SEEN)) {
                 return false;
@@ -66,6 +78,7 @@ public class ThreadOverviewItem {
     }
 
     public boolean isFlagged() {
+        final List<Email> emails = getOrderedEmails();
         for(Email email : emails) {
             if (email.keywords.contains(Keyword.FLAGGED)) {
                 return true;
@@ -80,31 +93,92 @@ public class ThreadOverviewItem {
     }
 
     public Map.Entry<String, From> getFrom() {
-        return Iterables.getLast(getFromMap().entrySet(), null);
+        return Iterables.getFirst(getFromMap().entrySet(), null);
     }
 
     private Map<String, From> getFromMap() {
-        LinkedHashMap<String, From> froms = new LinkedHashMap<>();
+        Map<String, From> map = this.fromMap.get();
+        if (map == null) {
+            synchronized (this.fromMap) {
+                map = this.fromMap.get();
+                if (map == null) {
+                    map = calculateFromMap();
+                    this.fromMap.set(map);
+                }
+            }
+        }
+        return map;
+    }
+
+    private Map<String, From> calculateFromMap() {
+        LinkedHashMap<String, From> fromMap = new LinkedHashMap<>();
+        final List<Email> emails = getOrderedEmails();
         for (Email email : emails) {
             final boolean seen = email.keywords.contains(Keyword.SEEN);
             for (EmailAddress emailAddress : email.emailAddresses) {
                 if (emailAddress.type == EmailAddressType.FROM) {
-                    From from = froms.get(emailAddress.email);
+                    From from = fromMap.get(emailAddress.email);
                     if (from == null) {
                         final String name = emailAddress.name == null ? emailAddress.email.split("@")[0] : emailAddress.name;
                         from = new From(name, seen);
-                        froms.put(emailAddress.email, from);
+                        fromMap.put(emailAddress.email, from);
                     } else {
                         from.seen &= seen;
                     }
                 }
             }
         }
-        return froms;
+        return fromMap;
     }
 
-    public From[] getFroms() {
+    private List<Email> getOrderedEmails() {
+        List<Email> list = this.orderedEmails.get();
+        if (list == null) {
+            synchronized (this.orderedEmails) {
+                list = this.orderedEmails.get();
+                if (list == null) {
+                    list = calculateOrderedEmails();
+                    this.orderedEmails.set(list);
+                }
+            }
+        }
+        return list;
+    }
+
+    private List<Email> calculateOrderedEmails() {
+        final List<ThreadItemEntity> threadItemEntities = new ArrayList<>(this.threadItemEntities);
+        Collections.sort(threadItemEntities, (o1, o2) -> o1.getPosition() - o2.getPosition());
+        final Map<String, Email> emailMap = new HashMap<>(emails.size());
+        for(Email email : emails) {
+            emailMap.put(email.id, email);
+        }
+        final List<Email> orderedList = new ArrayList<>(emails.size());
+        for(ThreadItemEntity threadItemEntity : threadItemEntities) {
+            Email email = emailMap.get(threadItemEntity.emailId);
+            if (email != null) {
+                orderedList.add(email);
+            }
+        }
+        return orderedList;
+    }
+
+    public From[] getFromValues() {
         return getFromMap().values().toArray(new From[0]);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ThreadOverviewItem item = (ThreadOverviewItem) o;
+        return Objects.equal(emailId, item.emailId) &&
+                Objects.equal(threadId, item.threadId) &&
+                Objects.equal(getOrderedEmails(), item.getOrderedEmails());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(emailId, threadId, getOrderedEmails(), threadItemEntities);
     }
 
     public static class Email {
@@ -121,22 +195,56 @@ public class ThreadOverviewItem {
         @Relation(entity = EmailEmailAddressEntity.class, parentColumn = "id", entityColumn = "emailId", projection = {"email", "name", "type"})
         public List<EmailAddress> emailAddresses;
 
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Email email = (Email) o;
+            return Objects.equal(id, email.id) &&
+                    Objects.equal(preview, email.preview) &&
+                    Objects.equal(threadId, email.threadId) &&
+                    Objects.equal(subject, email.subject) &&
+                    Objects.equal(receivedAt, email.receivedAt) &&
+                    Objects.equal(keywords, email.keywords) &&
+                    Objects.equal(emailAddresses, email.emailAddresses);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(id, preview, threadId, subject, receivedAt, keywords, emailAddresses);
+        }
     }
 
     public static class From {
         public final String name;
         public boolean seen;
 
-        public From(String name, boolean seen) {
+        From(String name, boolean seen) {
             this.name = name;
             this.seen = seen;
         }
+
     }
 
     public static class EmailAddress {
         public EmailAddressType type;
         public String email;
         public String name;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            EmailAddress that = (EmailAddress) o;
+            return type == that.type &&
+                    Objects.equal(email, that.email) &&
+                    Objects.equal(name, that.name);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(type, email, name);
+        }
     }
 
     public class EmailPosition {
