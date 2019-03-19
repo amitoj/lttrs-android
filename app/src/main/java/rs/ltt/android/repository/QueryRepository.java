@@ -20,6 +20,7 @@ import rs.ltt.android.Credentials;
 import rs.ltt.android.cache.DatabaseCache;
 import rs.ltt.android.database.LttrsDatabase;
 import rs.ltt.android.entity.ThreadOverviewItem;
+import rs.ltt.jmap.client.session.SessionFileCache;
 import rs.ltt.jmap.common.entity.EmailQuery;
 import rs.ltt.jmap.mua.Mua;
 
@@ -27,7 +28,7 @@ public class QueryRepository {
 
     private final LttrsDatabase database;
 
-    private final DatabaseCache muaCache;
+    private final Mua mua;
 
     private final Set<String> runningQueries = new HashSet<>();
     private final Set<String> runningPagingRequests = new HashSet<>();
@@ -38,7 +39,13 @@ public class QueryRepository {
 
     public QueryRepository(Application application) {
         this.database = LttrsDatabase.getInstance(application, Credentials.username);
-        this.muaCache = new DatabaseCache(this.database);
+        this.mua = Mua.builder()
+                .password(Credentials.password)
+                .username(Credentials.username)
+                .cache(new DatabaseCache(this.database))
+                .sessionCache(new SessionFileCache(application.getCacheDir()))
+                .queryPageSize(20)
+                .build();
     }
 
     public LiveData<PagedList<ThreadOverviewItem>> getThreadOverviewItems(final EmailQuery query) {
@@ -52,8 +59,8 @@ public class QueryRepository {
 
                     @Override
                     public void onItemAtEndLoaded(@NonNull ThreadOverviewItem itemAtEnd) {
-                        Log.d("lttrs","onItemAtEndLoaded("+itemAtEnd.emailId+")");
-                        requestNextPage(query,itemAtEnd.emailId);
+                        Log.d("lttrs", "onItemAtEndLoaded(" + itemAtEnd.emailId + ")");
+                        requestNextPage(query, itemAtEnd.emailId);
                         super.onItemAtEndLoaded(itemAtEnd);
                     }
                 })
@@ -70,7 +77,7 @@ public class QueryRepository {
         final String queryString = emailQuery.toQueryString();
         synchronized (this) {
             if (!runningQueries.add(queryString)) {
-                Log.d("lttrs","skipping refresh since already running");
+                Log.d("lttrs", "skipping refresh since already running");
                 return;
             }
             if (runningPagingRequests.contains(queryString)) {
@@ -79,12 +86,6 @@ public class QueryRepository {
             }
 
         }
-        Mua mua = Mua.builder()
-                .password(Credentials.password)
-                .username(Credentials.username)
-                .cache(this.muaCache)
-                .queryPageSize(20)
-                .build();
         mua.query(emailQuery).addListener(() -> {
             synchronized (runningQueries) {
                 runningQueries.remove(queryString);
@@ -98,16 +99,10 @@ public class QueryRepository {
         final String queryString = emailQuery.toQueryString();
         synchronized (this) {
             if (!runningPagingRequests.add(queryString)) {
-                Log.d("lttrs","skipping paging request since already running");
+                Log.d("lttrs", "skipping paging request since already running");
                 return;
             }
         }
-        final Mua mua = Mua.builder()
-                .username(Credentials.username)
-                .password(Credentials.password)
-                .cache(this.muaCache)
-                .queryPageSize(20)
-                .build();
         ListenableFuture<Boolean> hadResults = mua.query(emailQuery, afterEmailId);
         hadResults.addListener(() -> {
             final boolean modifiedImpliciedRefresh;
@@ -123,9 +118,9 @@ public class QueryRepository {
                 Log.d("lttrs", "had items=" + hadResults.get());
             } catch (ExecutionException e) {
                 Throwable cause = e.getCause();
-                Log.d("lttrs","error retrieving the next page",cause);
+                Log.d("lttrs", "error retrieving the next page", cause);
             } catch (Exception e) {
-                Log.d("lttrs","error paging ",e);
+                Log.d("lttrs", "error paging ", e);
             }
         }, MoreExecutors.directExecutor());
     }
