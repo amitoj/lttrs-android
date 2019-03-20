@@ -14,12 +14,12 @@
 
         <ImageView
             android:id="@+id/cover"
-            android:src="@drawable/cover"
-            android:visibility="gone"
             android:layout_width="wrap_content"
-            android:scaleType="centerCrop"
             android:layout_height="176dp"
-            android:layout_marginBottom="8dp"/>
+            android:layout_marginBottom="8dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/cover"
+            android:visibility="gone"/>
 
         <RelativeLayout
             android:id="@+id/item"
@@ -32,27 +32,27 @@
                 android:id="@+id/icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@{mailbox.role}"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:layout_marginStart="16dp"
-                android:layout_marginEnd="32dp"/>
+                android:layout_marginEnd="32dp"
+                android:src="@{mailbox.role}"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{mailbox.name}"
-                android:layout_toEndOf="@+id/icon"
                 android:layout_centerVertical="true"
-                style="@style/TextAppearance.AppCompat.Subhead"/>
+                android:layout_toEndOf="@+id/icon"
+                android:text="@{mailbox.name}"
+                android:textAppearance="?textAppearanceSubtitle1"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{mailbox.unreadThreads}"
-                android:layout_centerVertical="true"
                 android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
                 android:layout_marginEnd="16dp"
-                style="@style/TextAppearance.AppCompat.Subhead" />
+                android:text="@{mailbox.unreadThreads}"
+                android:textAppearance="?textAppearanceSubtitle1" />
 
         </RelativeLayout>
 
