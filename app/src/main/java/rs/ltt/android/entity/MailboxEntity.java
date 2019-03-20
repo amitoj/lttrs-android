@@ -1,16 +1,9 @@
 package rs.ltt.android.entity;
 
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
-
-import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
-import androidx.databinding.BindingAdapter;
 import androidx.room.Embedded;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
-import rs.ltt.android.R;
 import rs.ltt.jmap.common.entity.IdentifiableSpecialMailbox;
 import rs.ltt.jmap.common.entity.Mailbox;
 import rs.ltt.jmap.common.entity.Role;
