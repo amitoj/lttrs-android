@@ -3,11 +3,14 @@ package rs.ltt.android.ui;
 import android.os.Bundle;
 import android.view.MenuItem;
 
+import java.util.Map;
+
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.navigation.NavArgument;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
@@ -39,13 +42,7 @@ public class MainActivity extends AppCompatActivity implements AbstractMailboxQu
         }
 
         mailboxListAdapter.setOnMailboxOverviewItemSelectedListener(mailboxOverviewItem -> {
-            //might take a moment for the fragment to load and emit the id so we set it here
-            //will be overwritten by onMailboxOpened promptly
-            //but it is also a bit expensive
-            //mailboxListAdapter.setSelectedId(mailboxOverviewItem.id);
-
             binding.drawerLayout.closeDrawer(GravityCompat.START);
-            binding.appBarLayout.setExpanded(true, false);
             final boolean navigateToInbox = mailboxOverviewItem.role == Role.INBOX;
             final NavController nabController = Navigation.findNavController(this, R.id.nav_host_fragment);
             NavDestination currentDestination = nabController.getCurrentDestination();
@@ -58,11 +55,13 @@ public class MainActivity extends AppCompatActivity implements AbstractMailboxQu
                 if (navigateToInbox) {
                     nabController.navigate(MailboxQueryFragmentDirections.actionMailboxToInbox());
                 } else {
-                    //todo check if we already are in proper fragment and ignore if so
+                    if (mailboxOverviewItem.id.equals(mailboxListAdapter.getSelectedId())) {
+                        return;
+                    }
                     nabController.navigate(MailboxQueryFragmentDirections.actionMailboxToMailbox(mailboxOverviewItem.id));
                 }
             }
-            //navigate to this mailbox
+            binding.appBarLayout.setExpanded(true, false);
         });
         binding.mailboxList.setAdapter(mailboxListAdapter);
         mailboxListViewModel.getMailboxes().observe(this, mailboxListAdapter::submitList);

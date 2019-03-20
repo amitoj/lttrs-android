@@ -60,7 +60,7 @@ public class MailboxListAdapter extends ListAdapter<MailboxOverviewItem, Mailbox
             }
         });
         if (mailbox.id.equals(this.selectedId)) {
-            holder.binding.item.setBackgroundColor(ContextCompat.getColor(context,R.color.primary12));
+            holder.binding.item.setBackgroundColor(ContextCompat.getColor(context, R.color.primary12));
             ImageViewCompat.setImageTintList(holder.binding.icon, ColorStateList.valueOf(ContextCompat.getColor(context, R.color.colorPrimary)));
         } else {
             TypedValue outValue = new TypedValue();
@@ -85,12 +85,16 @@ public class MailboxListAdapter extends ListAdapter<MailboxOverviewItem, Mailbox
         }
     }
 
+    public String getSelectedId() {
+        return this.selectedId;
+    }
+
     private int getPosition(final String id) {
         if (id == null) {
             return RecyclerView.NO_POSITION;
         }
         List<MailboxOverviewItem> items = getCurrentList();
-        for(int i = 0; i < items.size(); ++i) {
+        for (int i = 0; i < items.size(); ++i) {
             if (id.equals(items.get(i).id)) {
                 return i;
             }
