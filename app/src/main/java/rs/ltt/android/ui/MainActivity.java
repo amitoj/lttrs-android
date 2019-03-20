@@ -41,8 +41,11 @@ public class MainActivity extends AppCompatActivity implements AbstractMailboxQu
         mailboxListAdapter.setOnMailboxOverviewItemSelectedListener(mailboxOverviewItem -> {
             //might take a moment for the fragment to load and emit the id so we set it here
             //will be overwritten by onMailboxOpened promptly
-            mailboxListAdapter.setSelectedId(mailboxOverviewItem.id);
+            //but it is also a bit expensive
+            //mailboxListAdapter.setSelectedId(mailboxOverviewItem.id);
+
             binding.drawerLayout.closeDrawer(GravityCompat.START);
+            binding.appBarLayout.setExpanded(true, false);
             final boolean navigateToInbox = mailboxOverviewItem.role == Role.INBOX;
             final NavController nabController = Navigation.findNavController(this, R.id.nav_host_fragment);
             NavDestination currentDestination = nabController.getCurrentDestination();
