@@ -264,32 +264,6 @@ public class ThreadOverviewItem {
         }
     }
 
-    public static class EmailAddress {
-        public EmailAddressType type;
-        public String email;
-        public String name;
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            EmailAddress that = (EmailAddress) o;
-            return type == that.type &&
-                    Objects.equal(email, that.email) &&
-                    Objects.equal(name, that.name);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(type, email, name);
-        }
-    }
-
-    public class EmailPosition {
-        public String emailId;
-        public Long position;
-    }
-
     @BindingAdapter("android:text")
     public static void setFroms(final TextView textView, final From[] froms) {
         final boolean shorten = froms.length > 1;

@@ -10,8 +10,12 @@ import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
+import androidx.navigation.NavController;
+import androidx.navigation.NavDestination;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import rs.ltt.android.MainNavDirections;
 import rs.ltt.android.R;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.android.ui.adapter.ThreadOverviewAdapter;
@@ -19,7 +23,7 @@ import rs.ltt.android.databinding.FragmentThreadListBinding;
 import rs.ltt.android.ui.model.AbstractQueryViewModel;
 
 
-public abstract class AbstractQueryFragment extends Fragment implements ThreadOverviewAdapter.OnFlaggedToggled {
+public abstract class AbstractQueryFragment extends Fragment implements ThreadOverviewAdapter.OnFlaggedToggled, ThreadOverviewAdapter.OnThreadClicked {
 
     private FragmentThreadListBinding binding;
 
@@ -51,8 +55,14 @@ public abstract class AbstractQueryFragment extends Fragment implements ThreadOv
         binding.threadList.setAdapter(threadOverviewAdapter);
         binding.setViewModel(viewModel);
         binding.setLifecycleOwner(getViewLifecycleOwner());
+
+
+        //TODO: do we want to get rid of flicer on changes
+        //((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
+
         viewModel.isRunningPagingRequest().observe(this, threadOverviewAdapter::setLoading);
         threadOverviewAdapter.setOnFlaggedToggledListener(this);
+        threadOverviewAdapter.setOnThreadClickedListener(this);
         return binding.getRoot();
     }
 
@@ -64,4 +74,9 @@ public abstract class AbstractQueryFragment extends Fragment implements ThreadOv
 
     protected abstract AbstractQueryViewModel getQueryViewModel();
 
+    @Override
+    public void onThreadClicked(String threadId) {
+        final NavController navController = Navigation.findNavController(getActivity(), R.id.nav_host_fragment);
+        navController.navigate(MainNavDirections.actionToThread(threadId));
+    }
 }

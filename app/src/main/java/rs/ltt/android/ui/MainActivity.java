@@ -44,23 +44,24 @@ public class MainActivity extends AppCompatActivity implements AbstractMailboxQu
         mailboxListAdapter.setOnMailboxOverviewItemSelectedListener(mailboxOverviewItem -> {
             binding.drawerLayout.closeDrawer(GravityCompat.START);
             final boolean navigateToInbox = mailboxOverviewItem.role == Role.INBOX;
-            final NavController nabController = Navigation.findNavController(this, R.id.nav_host_fragment);
-            NavDestination currentDestination = nabController.getCurrentDestination();
+            final NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+            NavDestination currentDestination = navController.getCurrentDestination();
             if (currentDestination != null && currentDestination.getId() == R.id.inbox) {
                 if (navigateToInbox) {
                     return;
                 }
-                nabController.navigate(MainMailboxQueryFragmentDirections.actionInboxToMailbox(mailboxOverviewItem.id));
+                navController.navigate(MainMailboxQueryFragmentDirections.actionInboxToMailbox(mailboxOverviewItem.id));
             } else if (currentDestination != null && currentDestination.getId() == R.id.mailbox) {
                 if (navigateToInbox) {
-                    nabController.navigate(MailboxQueryFragmentDirections.actionMailboxToInbox());
+                    navController.navigate(MailboxQueryFragmentDirections.actionMailboxToInbox());
                 } else {
                     if (mailboxOverviewItem.id.equals(mailboxListAdapter.getSelectedId())) {
                         return;
                     }
-                    nabController.navigate(MailboxQueryFragmentDirections.actionMailboxToMailbox(mailboxOverviewItem.id));
+                    navController.navigate(MailboxQueryFragmentDirections.actionMailboxToMailbox(mailboxOverviewItem.id));
                 }
             }
+            //currently unused should remain here in case we bring scrollable toolbar back
             binding.appBarLayout.setExpanded(true, false);
         });
         binding.mailboxList.setAdapter(mailboxListAdapter);

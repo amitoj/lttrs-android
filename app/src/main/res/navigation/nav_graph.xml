@@ -5,6 +5,10 @@
     android:id="@+id/main_nav"
     app:startDestination="@+id/inbox">
 
+    <action
+        android:id="@+id/action_to_thread"
+        app:destination="@+id/thread" />
+
     <fragment
         android:id="@+id/inbox"
         android:name="rs.ltt.android.ui.fragment.MainMailboxQueryFragment"
@@ -34,6 +38,17 @@
             app:destination="@+id/inbox"
             app:popUpTo="@+id/inbox"
             app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/thread"
+        android:name="rs.ltt.android.ui.fragment.ThreadFragment"
+        android:label="thread"
+        tools:layout="@layout/fragment_thread">
+        <argument
+            android:name="thread"
+            app:argType="string"
+            app:nullable="false" />
     </fragment>
 
 </navigation>

@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.util.List;
 
+import androidx.paging.DataSource;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
@@ -15,6 +16,8 @@ import rs.ltt.android.entity.EmailKeywordEntity;
 import rs.ltt.android.entity.EmailMailboxEntity;
 import rs.ltt.android.entity.EntityStateEntity;
 import rs.ltt.android.entity.EntityType;
+import rs.ltt.android.entity.FullEmail;
+import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.common.entity.TypedState;
 import rs.ltt.jmap.mua.cache.Update;
@@ -46,6 +49,10 @@ public abstract class EmailDao extends AbstractEntityDao<Email> {
     @Transaction
     @Query("select id from email where threadId=:threadId")
     public abstract List<EmailWithKeywords> getEmailsWithKeywords(String threadId);
+
+    @Transaction
+    @Query("select * from thread_item join email on thread_item.emailId=email.id where thread_item.threadId=:threadId order by position")
+    public abstract DataSource.Factory<Integer, FullEmail> getThread(String threadId);
 
     @Query("delete from email")
     abstract void deleteAll();

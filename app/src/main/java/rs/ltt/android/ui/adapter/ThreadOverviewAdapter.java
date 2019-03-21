@@ -25,6 +25,7 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
     private static final int LOADING_ITEM_VIEW_TYPE = 1;
 
     private OnFlaggedToggled onFlaggedToggled;
+    private OnThreadClicked onThreadClicked;
 
 
     public ThreadOverviewAdapter() {
@@ -76,6 +77,11 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
                 }
             });
             expandTouchArea(threadOverviewHolder.binding.getRoot(), threadOverviewHolder.binding.starToggle, 16);
+            threadOverviewHolder.binding.getRoot().setOnClickListener(v -> {
+                if (onThreadClicked != null) {
+                    onThreadClicked.onThreadClicked(item.threadId);
+                }
+            });
         }
     }
 
@@ -94,6 +100,10 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
 
     public void setOnFlaggedToggledListener(OnFlaggedToggled listener) {
         this.onFlaggedToggled = listener;
+    }
+
+    public void setOnThreadClickedListener(OnThreadClicked listener) {
+        this.onThreadClicked = listener;
     }
 
     @Override
@@ -145,5 +155,9 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
 
     public interface OnFlaggedToggled {
         void onFlaggedToggled(ThreadOverviewItem threadOverviewItem, boolean target);
+    }
+
+    public interface OnThreadClicked {
+        void onThreadClicked(String threadId);
     }
 }
