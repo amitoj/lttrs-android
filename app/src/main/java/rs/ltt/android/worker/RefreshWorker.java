@@ -15,7 +15,6 @@ public class RefreshWorker extends MuaWorker {
     @NonNull
     @Override
     public Result doWork() {
-        final Mua mua = createMua();
         try {
             mua.refresh().get();
             return Result.success();

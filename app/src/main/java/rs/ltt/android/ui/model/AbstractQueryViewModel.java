@@ -1,15 +1,25 @@
 package rs.ltt.android.ui.model;
 
 import android.app.Application;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
 import androidx.paging.PagedList;
+import androidx.work.Constraints;
+import androidx.work.Data;
+import androidx.work.ExistingWorkPolicy;
+import androidx.work.NetworkType;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
+import rs.ltt.android.entity.KeywordOverwriteEntity;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.android.repository.QueryRepository;
+import rs.ltt.android.worker.ModifyKeywordWorker;
 import rs.ltt.jmap.common.entity.EmailQuery;
+import rs.ltt.jmap.common.entity.Keyword;
 
 public abstract class AbstractQueryViewModel extends AndroidViewModel {
 
@@ -46,6 +56,32 @@ public abstract class AbstractQueryViewModel extends AndroidViewModel {
             throw new IllegalStateException("LiveData for paging not initialized. Forgot to call init()?");
         }
         return paging;
+    }
+
+    public void toggleFlagged(ThreadOverviewItem item) {
+        final boolean targetState = !item.showAsFlagged();
+        final KeywordOverwriteEntity keywordOverwriteEntity = new KeywordOverwriteEntity(item.threadId, Keyword.FLAGGED, targetState);
+        queryRepository.insert(keywordOverwriteEntity);
+
+        final Data inputData = new Data.Builder()
+                .putString("threadId", item.threadId)
+                .putString("keyword", Keyword.FLAGGED)
+                .putBoolean("target", targetState)
+                .build();
+
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build();
+
+
+        final String uniqueWorkName = "toggle-keyword-" + Keyword.FLAGGED + "-" + item.threadId;
+
+        OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(ModifyKeywordWorker.class)
+                .setConstraints(constraints)
+                .setInputData(inputData)
+                .build();
+        WorkManager workManager = WorkManager.getInstance();
+        workManager.enqueueUniqueWork(uniqueWorkName, ExistingWorkPolicy.REPLACE, workRequest);
     }
 
     public LiveData<PagedList<ThreadOverviewItem>> getThreadOverviewItems() {

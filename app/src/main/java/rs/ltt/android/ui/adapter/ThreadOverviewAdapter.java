@@ -1,7 +1,9 @@
 package rs.ltt.android.ui.adapter;
 
+import android.graphics.Rect;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.TouchDelegate;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -12,11 +14,11 @@ import androidx.databinding.DataBindingUtil;
 import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
-import rs.ltt.android.databinding.ThreadOverviewItemLoadingBinding;
-import rs.ltt.android.ui.AvatarDrawable;
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.ThreadOverviewItemBinding;
+import rs.ltt.android.databinding.ThreadOverviewItemLoadingBinding;
 import rs.ltt.android.entity.ThreadOverviewItem;
+import rs.ltt.android.ui.AvatarDrawable;
 
 public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, ThreadOverviewAdapter.AbstractThreadOverviewViewHolder> {
 
@@ -24,6 +26,8 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
 
     private static final int THREAD_ITEM_VIEW_TYPE = 0;
     private static final int LOADING_ITEM_VIEW_TYPE = 1;
+
+    private OnFlaggedToggled onFlaggedToggled;
 
 
     public ThreadOverviewAdapter() {
@@ -36,7 +40,7 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
             @Override
             public boolean areContentsTheSame(@NonNull ThreadOverviewItem oldItem, @NonNull ThreadOverviewItem newItem) {
                 if (!oldItem.equals(newItem)) {
-                    Log.d("lttrs",oldItem.getSubject()+" was not same as new item");
+                    Log.d("lttrs", oldItem.getSubject() + " was not same as new item");
                 }
                 return oldItem.equals(newItem);
             }
@@ -50,7 +54,7 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
         if (viewType == THREAD_ITEM_VIEW_TYPE) {
             return new ThreadOverviewViewHolder(DataBindingUtil.inflate(layoutInflater, R.layout.thread_overview_item, parent, false));
         } else {
-            return new ThreadOverviewLoadingViewHolder( DataBindingUtil.inflate(layoutInflater, R.layout.thread_overview_item_loading, parent, false));
+            return new ThreadOverviewLoadingViewHolder(DataBindingUtil.inflate(layoutInflater, R.layout.thread_overview_item_loading, parent, false));
         }
     }
 
@@ -72,6 +76,13 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
                 return;
             }
             threadOverviewHolder.binding.avatar.setImageDrawable(new AvatarDrawable(from.getValue().name, from.getKey()));
+            threadOverviewHolder.binding.starToggle.setOnClickListener(v -> {
+                if (onFlaggedToggled != null) {
+                    ThreadOverviewItem.setIsFlagged(threadOverviewHolder.binding.starToggle, !item.showAsFlagged());
+                    onFlaggedToggled.onFlaggedToggled(item);
+                }
+            });
+            expandTouchArea(threadOverviewHolder.binding.getRoot(),threadOverviewHolder.binding.starToggle,16);
         }
     }
 
@@ -88,9 +99,28 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
         return position < super.getItemCount() ? THREAD_ITEM_VIEW_TYPE : LOADING_ITEM_VIEW_TYPE;
     }
 
+    public void setOnFlaggedToggledListener(OnFlaggedToggled listener) {
+        this.onFlaggedToggled = listener;
+    }
+
     @Override
     public int getItemCount() {
         return super.getItemCount() + 1;
+    }
+
+
+    private static void expandTouchArea(final View parent, final View view, final int dp) {
+        float scale = parent.getContext().getResources().getDisplayMetrics().density;
+        int padding = (int) (scale * dp);
+        parent.post(() -> {
+            Rect rect = new Rect();
+            view.getHitRect(rect);
+            rect.top -= padding;
+            rect.left -= padding;
+            rect.right += padding;
+            rect.bottom += padding;
+            parent.setTouchDelegate(new TouchDelegate(rect, view));
+        });
     }
 
     abstract class AbstractThreadOverviewViewHolder extends RecyclerView.ViewHolder {
@@ -118,5 +148,9 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
             super(binding.getRoot());
             this.binding = binding;
         }
+    }
+
+    public interface OnFlaggedToggled {
+        void onFlaggedToggled(ThreadOverviewItem threadOverviewItem);
     }
 }

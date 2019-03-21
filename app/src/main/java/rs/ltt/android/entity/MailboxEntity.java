@@ -4,12 +4,12 @@ import androidx.annotation.NonNull;
 import androidx.room.Embedded;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
-import rs.ltt.jmap.common.entity.IdentifiableSpecialMailbox;
+import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
 import rs.ltt.jmap.common.entity.Mailbox;
 import rs.ltt.jmap.common.entity.Role;
 
 @Entity(tableName = "mailbox")
-public class MailboxEntity implements IdentifiableSpecialMailbox {
+public class MailboxEntity implements IdentifiableMailboxWithRole {
 
     @NonNull
     @PrimaryKey

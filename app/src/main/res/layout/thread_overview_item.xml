@@ -99,7 +99,7 @@
             android:layout_alignParentEnd="true"
             android:layout_marginStart="8sp"
             android:baselineAlignBottom="true"
-            app:isFlagged="@{thread.isFlagged()}"
+            app:isFlagged="@{thread.showAsFlagged()}"
             tools:alpha="0.57"
             tools:src="@drawable/ic_star_border_black_24dp" />
     </RelativeLayout>

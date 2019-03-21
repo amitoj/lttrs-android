@@ -9,6 +9,8 @@ import com.google.common.util.concurrent.MoreExecutors;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
@@ -19,6 +21,7 @@ import androidx.paging.PagedList;
 import rs.ltt.android.Credentials;
 import rs.ltt.android.cache.DatabaseCache;
 import rs.ltt.android.database.LttrsDatabase;
+import rs.ltt.android.entity.KeywordOverwriteEntity;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.jmap.client.session.SessionFileCache;
 import rs.ltt.jmap.common.entity.EmailQuery;
@@ -35,6 +38,8 @@ public class QueryRepository {
 
     private MutableLiveData<Set<String>> runningQueriesLiveData = new MutableLiveData<>(runningQueries);
     private MutableLiveData<Set<String>> runningPagingRequestsLiveData = new MutableLiveData<>(runningPagingRequests);
+
+    private final Executor ioExecutor = Executors.newSingleThreadExecutor();
 
 
     public QueryRepository(Application application) {
@@ -137,4 +142,8 @@ public class QueryRepository {
         }, MoreExecutors.directExecutor());
     }
 
+    public void insert(KeywordOverwriteEntity keywordOverwriteEntity) {
+        Log.d("lttrs","db insert keyword overwrite "+keywordOverwriteEntity.value);
+        ioExecutor.execute(() -> database.keywordToggleDao().insert(keywordOverwriteEntity));
+    }
 }

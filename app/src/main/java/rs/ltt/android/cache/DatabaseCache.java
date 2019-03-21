@@ -10,11 +10,10 @@ import java.util.Collection;
 import java.util.List;
 
 import rs.ltt.android.database.LttrsDatabase;
-import rs.ltt.android.entity.EntityStateEntity;
 import rs.ltt.android.entity.EntityType;
 import rs.ltt.android.entity.MailboxEntity;
 import rs.ltt.jmap.common.entity.Email;
-import rs.ltt.jmap.common.entity.IdentifiableSpecialMailbox;
+import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
 import rs.ltt.jmap.common.entity.Identity;
 import rs.ltt.jmap.common.entity.Mailbox;
 import rs.ltt.jmap.common.entity.Thread;
@@ -82,7 +81,7 @@ public class DatabaseCache implements Cache {
     }
 
     @Override
-    public Collection<? extends IdentifiableSpecialMailbox> getSpecialMailboxes() throws NotSynchronizedException {
+    public Collection<? extends IdentifiableMailboxWithRole> getSpecialMailboxes() throws NotSynchronizedException {
         return database.mailboxDao().getSpecialMailboxes();
     }
 

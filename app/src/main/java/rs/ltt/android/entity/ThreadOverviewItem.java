@@ -5,22 +5,23 @@ import android.graphics.Typeface;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.StyleSpan;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 
-import java.security.Key;
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +52,9 @@ public class ThreadOverviewItem {
     @Relation(parentColumn = "threadId", entityColumn = "threadId")
     public List<ThreadItemEntity> threadItemEntities;
 
+    @Relation(parentColumn = "threadId", entityColumn = "threadId")
+    public Set<KeywordOverwriteEntity> keywordOverwriteEntities;
+
 
     public String getPreview() {
         final Email email = Iterables.getLast(getOrderedEmails(), null);
@@ -77,7 +81,21 @@ public class ThreadOverviewItem {
         return true;
     }
 
-    public boolean isFlagged() {
+    private KeywordOverwriteEntity getKeywordOverwrite(String keyword) {
+        for(KeywordOverwriteEntity keywordOverwriteEntity : keywordOverwriteEntities) {
+            if (keyword.equals(keywordOverwriteEntity.keyword)) {
+                return keywordOverwriteEntity;
+            }
+        }
+        return null;
+    }
+
+    public boolean showAsFlagged() {
+        KeywordOverwriteEntity flaggedOverwrite = getKeywordOverwrite(Keyword.FLAGGED);
+        return flaggedOverwrite != null ? flaggedOverwrite.value : isFlagged();
+    }
+
+    private boolean isFlagged() {
         final List<Email> emails = getOrderedEmails();
         for(Email email : emails) {
             if (email.keywords.contains(Keyword.FLAGGED)) {
@@ -148,10 +166,13 @@ public class ThreadOverviewItem {
     private List<Email> calculateOrderedEmails() {
         final List<ThreadItemEntity> threadItemEntities = new ArrayList<>(this.threadItemEntities);
         Collections.sort(threadItemEntities, (o1, o2) -> o1.getPosition() - o2.getPosition());
-        final Map<String, Email> emailMap = new HashMap<>(emails.size());
-        for(Email email : emails) {
-            emailMap.put(email.id, email);
-        }
+        final Map<String, Email> emailMap = Maps.uniqueIndex(emails, new Function<Email, String>() {
+            @NullableDecl
+            @Override
+            public String apply(Email input) {
+                return input.id;
+            }
+        });
         final List<Email> orderedList = new ArrayList<>(emails.size());
         for(ThreadItemEntity threadItemEntity : threadItemEntities) {
             Email email = emailMap.get(threadItemEntity.emailId);
@@ -173,6 +194,7 @@ public class ThreadOverviewItem {
         ThreadOverviewItem item = (ThreadOverviewItem) o;
         return Objects.equal(emailId, item.emailId) &&
                 Objects.equal(threadId, item.threadId) &&
+                Objects.equal(showAsFlagged(), item.showAsFlagged()) &&
                 Objects.equal(getOrderedEmails(), item.getOrderedEmails());
     }
 

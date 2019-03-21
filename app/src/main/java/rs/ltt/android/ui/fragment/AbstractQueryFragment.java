@@ -13,12 +13,13 @@ import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import rs.ltt.android.R;
+import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.android.ui.adapter.ThreadOverviewAdapter;
 import rs.ltt.android.databinding.FragmentThreadListBinding;
 import rs.ltt.android.ui.model.AbstractQueryViewModel;
 
 
-public abstract class AbstractQueryFragment extends Fragment {
+public abstract class AbstractQueryFragment extends Fragment implements ThreadOverviewAdapter.OnFlaggedToggled {
 
     private FragmentThreadListBinding binding;
 
@@ -51,7 +52,14 @@ public abstract class AbstractQueryFragment extends Fragment {
         binding.setViewModel(viewModel);
         binding.setLifecycleOwner(getViewLifecycleOwner());
         viewModel.isRunningPagingRequest().observe(this, threadOverviewAdapter::setLoading);
+        threadOverviewAdapter.setOnFlaggedToggledListener(this);
         return binding.getRoot();
+    }
+
+    @Override
+    public void onFlaggedToggled(ThreadOverviewItem item) {
+        getQueryViewModel().toggleFlagged(item);
+
     }
 
     protected abstract AbstractQueryViewModel getQueryViewModel();

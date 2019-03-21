@@ -5,10 +5,10 @@ import android.util.Log;
 import java.util.List;
 
 import androidx.room.Dao;
-import androidx.room.Ignore;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Transaction;
+import rs.ltt.android.entity.EmailWithKeywords;
 import rs.ltt.android.entity.EmailEmailAddressEntity;
 import rs.ltt.android.entity.EmailEntity;
 import rs.ltt.android.entity.EmailKeywordEntity;
@@ -18,8 +18,6 @@ import rs.ltt.android.entity.EntityType;
 import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.common.entity.TypedState;
 import rs.ltt.jmap.mua.cache.Update;
-
-import static androidx.room.OnConflictStrategy.IGNORE;
 
 @Dao
 public abstract class EmailDao extends AbstractEntityDao<Email> {
@@ -39,11 +37,15 @@ public abstract class EmailDao extends AbstractEntityDao<Email> {
     @Insert
     abstract void insertEmailAddresses(List<EmailEmailAddressEntity> entities);
 
-    @Insert()
+    @Insert
     abstract void insertMailboxes(List<EmailMailboxEntity> entities);
 
-    @Insert()
+    @Insert
     abstract void insertKeywords(List<EmailKeywordEntity> entities);
+
+    @Transaction
+    @Query("select id from email where threadId=:threadId")
+    public abstract List<EmailWithKeywords> getEmailsWithKeywords(String threadId);
 
     @Query("delete from email")
     abstract void deleteAll();
@@ -51,16 +53,18 @@ public abstract class EmailDao extends AbstractEntityDao<Email> {
     @Transaction
     public void set(final Email[] emails, final String state) {
         if (state != null && state.equals(getState(EntityType.EMAIL))) {
-            Log.d("lttrs","nothing to do. emails with this state have already been set");
+            Log.d("lttrs", "nothing to do. emails with this state have already been set");
             return;
         }
         deleteAll();
-        //TODO delete old email
         if (emails.length > 0) {
             insertEmails(emails);
         }
         insert(new EntityStateEntity(EntityType.EMAIL, state));
     }
+
+    @Query("delete from keyword_overwrite where threadId=(select threadId from email where id=:emailId)")
+    protected abstract void deleteKeywordToggle(String emailId);
 
     @Transaction
     public void add(final TypedState<Email> expectedState, Email[] email) {
@@ -85,7 +89,7 @@ public abstract class EmailDao extends AbstractEntityDao<Email> {
     public void updateEmails(Update<Email> update, String[] updatedProperties) {
         final String newState = update.getNewTypedState().getState();
         if (newState != null && newState.equals(getState(EntityType.EMAIL))) {
-            Log.d("lttrs","nothing to do. emails already at newest state");
+            Log.d("lttrs", "nothing to do. emails already at newest state");
             return;
         }
         final Email[] created = update.getCreated();
@@ -95,7 +99,7 @@ public abstract class EmailDao extends AbstractEntityDao<Email> {
         if (updatedProperties != null) {
             for (Email email : update.getUpdated()) {
                 if (!exists(email.getId())) {
-                    Log.d("lttrs","skipping updates to email "+email.getId()+" because we don’t have that");
+                    Log.d("lttrs", "skipping updates to email " + email.getId() + " because we don’t have that");
                     continue;
                 }
                 for (String property : updatedProperties) {
@@ -112,6 +116,9 @@ public abstract class EmailDao extends AbstractEntityDao<Email> {
                             throw new IllegalArgumentException("Unable to update property '" + property + "'");
                     }
                 }
+
+                deleteKeywordToggle(email.getId());
+
             }
         }
         for (String id : update.getDestroyed()) {
