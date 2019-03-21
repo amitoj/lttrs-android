@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +33,7 @@ import androidx.databinding.BindingAdapter;
 import androidx.room.Ignore;
 import androidx.room.Relation;
 import rs.ltt.android.R;
+import rs.ltt.android.ui.AvatarDrawable;
 import rs.ltt.jmap.common.entity.Keyword;
 
 public class ThreadOverviewItem {
@@ -345,6 +345,15 @@ public class ThreadOverviewItem {
         } else {
             imageView.setImageResource(R.drawable.ic_star_border_black_24dp);
             ImageViewCompat.setImageTintList(imageView, ColorStateList.valueOf(ContextCompat.getColor(imageView.getContext(), R.color.black54)));
+        }
+    }
+
+    @BindingAdapter("from")
+    public static void setFrom(final ImageView imageView, final Map.Entry<String, ThreadOverviewItem.From> from) {
+        if (from == null) {
+            imageView.setImageDrawable(new AvatarDrawable(null,null));
+        } else {
+            imageView.setImageDrawable(new AvatarDrawable(from.getValue().name, from.getKey()));
         }
     }
 }

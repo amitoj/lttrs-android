@@ -7,8 +7,6 @@ import android.view.TouchDelegate;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.Map;
-
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.paging.PagedListAdapter;
@@ -18,7 +16,6 @@ import rs.ltt.android.R;
 import rs.ltt.android.databinding.ThreadOverviewItemBinding;
 import rs.ltt.android.databinding.ThreadOverviewItemLoadingBinding;
 import rs.ltt.android.entity.ThreadOverviewItem;
-import rs.ltt.android.ui.AvatarDrawable;
 
 public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, ThreadOverviewAdapter.AbstractThreadOverviewViewHolder> {
 
@@ -71,11 +68,6 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
                 return;
             }
             threadOverviewHolder.binding.setThread(item);
-            Map.Entry<String, ThreadOverviewItem.From> from = item.getFrom();
-            if (from == null) {
-                return;
-            }
-            threadOverviewHolder.binding.avatar.setImageDrawable(new AvatarDrawable(from.getValue().name, from.getKey()));
             threadOverviewHolder.binding.starToggle.setOnClickListener(v -> {
                 if (onFlaggedToggled != null) {
                     ThreadOverviewItem.setIsFlagged(threadOverviewHolder.binding.starToggle, !item.showAsFlagged());

@@ -17,14 +17,14 @@ public class AvatarDrawable extends ColorDrawable {
 
     public AvatarDrawable(String name, String key) {
         paint = new Paint();
-        paint.setColor(XEP0392Helper.rgbFromKey(key));
+        paint.setColor(key == null ? 0xff757575 : XEP0392Helper.rgbFromKey(key));
         paint.setAntiAlias(true);
         textPaint = new Paint();
         textPaint.setColor(Color.WHITE);
         textPaint.setTextAlign(Paint.Align.CENTER);
         textPaint.setAntiAlias(true);
         textPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
-        this.letter = String.valueOf(Character.toUpperCase(name.charAt(0)));
+        this.letter = name == null ? null : String.valueOf(Character.toUpperCase(name.charAt(0)));
     }
 
     @Override
@@ -37,11 +37,14 @@ public class AvatarDrawable extends ColorDrawable {
         canvas.getClipBounds(r);
         int cHeight = r.height();
         int cWidth = r.width();
+        canvas.drawCircle(midx, midy, radius, paint);
+        if (letter == null) {
+            return;
+        }
         textPaint.setTextAlign(Paint.Align.LEFT);
         textPaint.getTextBounds(letter, 0, letter.length(), r);
         float x = cWidth / 2f - r.width() / 2f - r.left;
         float y = cHeight / 2f + r.height() / 2f - r.bottom;
-        canvas.drawCircle(midx, midy, radius, paint);
         canvas.drawText(letter, x, y, textPaint);
     }
 }

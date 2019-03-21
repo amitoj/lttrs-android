@@ -25,7 +25,8 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp" />
+            android:layout_marginEnd="16dp"
+            app:from="@{thread.getFrom()}"/>
 
         <TextView
             android:id="@+id/froms"
