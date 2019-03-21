@@ -58,8 +58,7 @@ public abstract class AbstractQueryViewModel extends AndroidViewModel {
         return paging;
     }
 
-    public void toggleFlagged(ThreadOverviewItem item) {
-        final boolean targetState = !item.showAsFlagged();
+    public void toggleFlagged(ThreadOverviewItem item, boolean targetState) {
         final KeywordOverwriteEntity keywordOverwriteEntity = new KeywordOverwriteEntity(item.threadId, Keyword.FLAGGED, targetState);
         queryRepository.insert(keywordOverwriteEntity);
 

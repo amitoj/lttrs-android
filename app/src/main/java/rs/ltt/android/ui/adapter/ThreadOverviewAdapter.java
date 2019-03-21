@@ -70,11 +70,12 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
             threadOverviewHolder.binding.setThread(item);
             threadOverviewHolder.binding.starToggle.setOnClickListener(v -> {
                 if (onFlaggedToggled != null) {
-                    ThreadOverviewItem.setIsFlagged(threadOverviewHolder.binding.starToggle, !item.showAsFlagged());
-                    onFlaggedToggled.onFlaggedToggled(item);
+                    final boolean target = !item.showAsFlagged();
+                    ThreadOverviewItem.setIsFlagged(threadOverviewHolder.binding.starToggle, target);
+                    onFlaggedToggled.onFlaggedToggled(item, target);
                 }
             });
-            expandTouchArea(threadOverviewHolder.binding.getRoot(),threadOverviewHolder.binding.starToggle,16);
+            expandTouchArea(threadOverviewHolder.binding.getRoot(), threadOverviewHolder.binding.starToggle, 16);
         }
     }
 
@@ -143,6 +144,6 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
     }
 
     public interface OnFlaggedToggled {
-        void onFlaggedToggled(ThreadOverviewItem threadOverviewItem);
+        void onFlaggedToggled(ThreadOverviewItem threadOverviewItem, boolean target);
     }
 }

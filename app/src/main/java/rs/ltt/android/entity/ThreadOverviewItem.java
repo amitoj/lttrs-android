@@ -18,6 +18,7 @@ import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -192,10 +193,12 @@ public class ThreadOverviewItem {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ThreadOverviewItem item = (ThreadOverviewItem) o;
-        return Objects.equal(emailId, item.emailId) &&
-                Objects.equal(threadId, item.threadId) &&
+        return Objects.equal(getSubject(), item.getSubject()) &&
+                Objects.equal(getPreview(), item.getPreview()) &&
                 Objects.equal(showAsFlagged(), item.showAsFlagged()) &&
-                Objects.equal(getOrderedEmails(), item.getOrderedEmails());
+                Objects.equal(getReceivedAt(), item.getReceivedAt()) &&
+                Objects.equal(everyHasSeenKeyword(), item.everyHasSeenKeyword()) &&
+                Arrays.equals(getFromValues(),item.getFromValues());
     }
 
     @Override
@@ -246,6 +249,19 @@ public class ThreadOverviewItem {
             this.seen = seen;
         }
 
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            From from = (From) o;
+            return seen == from.seen &&
+                    Objects.equal(name, from.name);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(name, seen);
+        }
     }
 
     public static class EmailAddress {

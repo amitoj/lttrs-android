@@ -57,8 +57,8 @@ public abstract class AbstractQueryFragment extends Fragment implements ThreadOv
     }
 
     @Override
-    public void onFlaggedToggled(ThreadOverviewItem item) {
-        getQueryViewModel().toggleFlagged(item);
+    public void onFlaggedToggled(ThreadOverviewItem item, boolean target) {
+        getQueryViewModel().toggleFlagged(item, target);
 
     }
 
