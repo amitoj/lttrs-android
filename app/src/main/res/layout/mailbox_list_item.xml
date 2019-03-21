@@ -12,15 +12,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <ImageView
-            android:id="@+id/cover"
-            android:layout_width="wrap_content"
-            android:layout_height="176dp"
-            android:layout_marginBottom="8dp"
-            android:scaleType="centerCrop"
-            android:src="@drawable/cover"
-            android:visibility="gone"/>
-
         <RelativeLayout
             android:id="@+id/item"
             android:layout_width="match_parent"

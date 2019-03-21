@@ -17,10 +17,14 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import rs.ltt.android.R;
+import rs.ltt.android.databinding.MailboxListHeaderBinding;
 import rs.ltt.android.databinding.MailboxListItemBinding;
 import rs.ltt.android.entity.MailboxOverviewItem;
 
-public class MailboxListAdapter extends ListAdapter<MailboxOverviewItem, MailboxListAdapter.MailboxViewHolder> {
+public class MailboxListAdapter extends ListAdapter<MailboxOverviewItem, MailboxListAdapter.AbstractMailboxViewHolder> {
+
+    private static final int ITEM_VIEW_TYPE = 1;
+    private static final int HEADER_VIEW_TYPE = 2;
 
     private String selectedId = null;
 
@@ -43,17 +47,25 @@ public class MailboxListAdapter extends ListAdapter<MailboxOverviewItem, Mailbox
 
     @NonNull
     @Override
-    public MailboxViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        MailboxListItemBinding binding = DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()), R.layout.mailbox_list_item, parent, false);
-        return new MailboxViewHolder(binding);
+    public AbstractMailboxViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == ITEM_VIEW_TYPE) {
+            MailboxListItemBinding binding = DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()), R.layout.mailbox_list_item, parent, false);
+            return new MailboxViewHolder(binding);
+        } else {
+            MailboxListHeaderBinding binding = DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()), R.layout.mailbox_list_header, parent, false);
+            return new MailboxHeaderViewHolder(binding);
+        }
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MailboxViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull AbstractMailboxViewHolder abstractHolder, final int position) {
+        if (abstractHolder instanceof MailboxHeaderViewHolder) {
+            return;
+        }
+        MailboxViewHolder holder = (MailboxViewHolder) abstractHolder;
         final Context context = holder.binding.getRoot().getContext();
         final MailboxOverviewItem mailbox = getItem(position);
         holder.binding.setMailbox(mailbox);
-        holder.binding.cover.setVisibility(position == 0 ? View.VISIBLE : View.GONE);
         holder.binding.item.setOnClickListener(v -> {
             if (onMailboxOverviewItemSelected != null) {
                 onMailboxOverviewItemSelected.onMailboxOverviewItemSelected(mailbox);
@@ -96,21 +108,53 @@ public class MailboxListAdapter extends ListAdapter<MailboxOverviewItem, Mailbox
         List<MailboxOverviewItem> items = getCurrentList();
         for (int i = 0; i < items.size(); ++i) {
             if (id.equals(items.get(i).id)) {
-                return i;
+                return i + 1;
             }
         }
         return RecyclerView.NO_POSITION;
+    }
+
+    @Override
+    public int getItemCount() {
+        return super.getItemCount() + 1;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return position == 0 ?  HEADER_VIEW_TYPE : ITEM_VIEW_TYPE;
+    }
+
+    @Override
+    public MailboxOverviewItem getItem(int position) {
+        return super.getItem(position - 1);
     }
 
     public void setOnMailboxOverviewItemSelectedListener(OnMailboxOverviewItemSelected listener) {
         this.onMailboxOverviewItemSelected = listener;
     }
 
-    class MailboxViewHolder extends RecyclerView.ViewHolder {
+    class AbstractMailboxViewHolder extends RecyclerView.ViewHolder {
+
+        public AbstractMailboxViewHolder(@NonNull View itemView) {
+            super(itemView);
+        }
+    }
+
+    class MailboxViewHolder extends AbstractMailboxViewHolder {
 
         private final MailboxListItemBinding binding;
 
         MailboxViewHolder(@NonNull MailboxListItemBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
+        }
+    }
+
+    class MailboxHeaderViewHolder extends AbstractMailboxViewHolder {
+
+        private final MailboxListHeaderBinding binding;
+
+        MailboxHeaderViewHolder(@NonNull MailboxListHeaderBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }
