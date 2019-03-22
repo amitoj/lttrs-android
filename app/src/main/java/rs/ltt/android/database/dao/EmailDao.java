@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.util.List;
 
+import androidx.lifecycle.LiveData;
 import androidx.paging.DataSource;
 import androidx.room.Dao;
 import androidx.room.Insert;
@@ -17,6 +18,7 @@ import rs.ltt.android.entity.EmailMailboxEntity;
 import rs.ltt.android.entity.EntityStateEntity;
 import rs.ltt.android.entity.EntityType;
 import rs.ltt.android.entity.FullEmail;
+import rs.ltt.android.entity.ThreadHeader;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.common.entity.TypedState;
@@ -51,8 +53,12 @@ public abstract class EmailDao extends AbstractEntityDao<Email> {
     public abstract List<EmailWithKeywords> getEmailsWithKeywords(String threadId);
 
     @Transaction
-    @Query("select * from thread_item join email on thread_item.emailId=email.id where thread_item.threadId=:threadId order by position")
-    public abstract DataSource.Factory<Integer, FullEmail> getThread(String threadId);
+    @Query("select id,receivedAt,preview,email.threadId from thread_item join email on thread_item.emailId=email.id where thread_item.threadId=:threadId order by position")
+    public abstract DataSource.Factory<Integer, FullEmail> getEmails(String threadId);
+
+    @Transaction
+    @Query("select subject,email.threadId from thread_item join email on thread_item.emailId=email.id where thread_item.threadId=:threadId order by position limit 1")
+    public abstract LiveData<ThreadHeader> getThreadHeader(String threadId);
 
     @Query("delete from email")
     abstract void deleteAll();
@@ -93,6 +99,7 @@ public abstract class EmailDao extends AbstractEntityDao<Email> {
         }
     }
 
+    @Transaction
     public void updateEmails(Update<Email> update, String[] updatedProperties) {
         final String newState = update.getNewTypedState().getState();
         if (newState != null && newState.equals(getState(EntityType.EMAIL))) {

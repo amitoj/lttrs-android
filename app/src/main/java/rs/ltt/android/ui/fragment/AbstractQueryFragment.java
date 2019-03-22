@@ -9,21 +9,19 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.navigation.NavController;
-import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import rs.ltt.android.MainNavDirections;
 import rs.ltt.android.R;
-import rs.ltt.android.entity.ThreadOverviewItem;
-import rs.ltt.android.ui.adapter.ThreadOverviewAdapter;
 import rs.ltt.android.databinding.FragmentThreadListBinding;
+import rs.ltt.android.ui.adapter.OnFlaggedToggled;
+import rs.ltt.android.ui.adapter.ThreadOverviewAdapter;
 import rs.ltt.android.ui.model.AbstractQueryViewModel;
 
 
-public abstract class AbstractQueryFragment extends Fragment implements ThreadOverviewAdapter.OnFlaggedToggled, ThreadOverviewAdapter.OnThreadClicked {
+public abstract class AbstractQueryFragment extends Fragment implements OnFlaggedToggled, ThreadOverviewAdapter.OnThreadClicked {
 
     private FragmentThreadListBinding binding;
 
@@ -67,9 +65,8 @@ public abstract class AbstractQueryFragment extends Fragment implements ThreadOv
     }
 
     @Override
-    public void onFlaggedToggled(ThreadOverviewItem item, boolean target) {
-        getQueryViewModel().toggleFlagged(item, target);
-
+    public void onFlaggedToggled(String threadId, boolean target) {
+        getQueryViewModel().toggleFlagged(threadId, target);
     }
 
     protected abstract AbstractQueryViewModel getQueryViewModel();

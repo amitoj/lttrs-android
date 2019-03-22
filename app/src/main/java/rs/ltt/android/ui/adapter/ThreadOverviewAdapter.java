@@ -16,6 +16,7 @@ import rs.ltt.android.R;
 import rs.ltt.android.databinding.ThreadOverviewItemBinding;
 import rs.ltt.android.databinding.ThreadOverviewItemLoadingBinding;
 import rs.ltt.android.entity.ThreadOverviewItem;
+import rs.ltt.android.util.Touch;
 
 public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, ThreadOverviewAdapter.AbstractThreadOverviewViewHolder> {
 
@@ -73,10 +74,10 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
                 if (onFlaggedToggled != null) {
                     final boolean target = !item.showAsFlagged();
                     ThreadOverviewItem.setIsFlagged(threadOverviewHolder.binding.starToggle, target);
-                    onFlaggedToggled.onFlaggedToggled(item, target);
+                    onFlaggedToggled.onFlaggedToggled(item.threadId, target);
                 }
             });
-            expandTouchArea(threadOverviewHolder.binding.getRoot(), threadOverviewHolder.binding.starToggle, 16);
+            Touch.expandTouchArea(threadOverviewHolder.binding.getRoot(), threadOverviewHolder.binding.starToggle, 16);
             threadOverviewHolder.binding.getRoot().setOnClickListener(v -> {
                 if (onThreadClicked != null) {
                     onThreadClicked.onThreadClicked(item.threadId);
@@ -112,20 +113,6 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
     }
 
 
-    private static void expandTouchArea(final View parent, final View view, final int dp) {
-        float scale = parent.getContext().getResources().getDisplayMetrics().density;
-        int padding = (int) (scale * dp);
-        parent.post(() -> {
-            Rect rect = new Rect();
-            view.getHitRect(rect);
-            rect.top -= padding;
-            rect.left -= padding;
-            rect.right += padding;
-            rect.bottom += padding;
-            parent.setTouchDelegate(new TouchDelegate(rect, view));
-        });
-    }
-
     abstract class AbstractThreadOverviewViewHolder extends RecyclerView.ViewHolder {
 
         AbstractThreadOverviewViewHolder(@NonNull View itemView) {
@@ -151,10 +138,6 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
             super(binding.getRoot());
             this.binding = binding;
         }
-    }
-
-    public interface OnFlaggedToggled {
-        void onFlaggedToggled(ThreadOverviewItem threadOverviewItem, boolean target);
     }
 
     public interface OnThreadClicked {

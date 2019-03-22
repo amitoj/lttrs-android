@@ -58,31 +58,6 @@ public abstract class AbstractQueryViewModel extends AndroidViewModel {
         return paging;
     }
 
-    public void toggleFlagged(ThreadOverviewItem item, boolean targetState) {
-        final KeywordOverwriteEntity keywordOverwriteEntity = new KeywordOverwriteEntity(item.threadId, Keyword.FLAGGED, targetState);
-        queryRepository.insert(keywordOverwriteEntity);
-
-        final Data inputData = new Data.Builder()
-                .putString("threadId", item.threadId)
-                .putString("keyword", Keyword.FLAGGED)
-                .putBoolean("target", targetState)
-                .build();
-
-        Constraints constraints = new Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .build();
-
-
-        final String uniqueWorkName = "toggle-keyword-" + Keyword.FLAGGED + "-" + item.threadId;
-
-        OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(ModifyKeywordWorker.class)
-                .setConstraints(constraints)
-                .setInputData(inputData)
-                .build();
-        WorkManager workManager = WorkManager.getInstance();
-        workManager.enqueueUniqueWork(uniqueWorkName, ExistingWorkPolicy.REPLACE, workRequest);
-    }
-
     public LiveData<PagedList<ThreadOverviewItem>> getThreadOverviewItems() {
         final LiveData<PagedList<ThreadOverviewItem>> liveData = this.threads;
         if (liveData == null) {
@@ -99,4 +74,8 @@ public abstract class AbstractQueryViewModel extends AndroidViewModel {
     }
 
     protected abstract LiveData<EmailQuery> getQuery();
+
+    public void toggleFlagged(String threadId, boolean target) {
+        this.queryRepository.toggleFlagged(threadId, target);
+    }
 }

@@ -18,7 +18,6 @@ public class FullEmail {
     public String id;
     public String preview;
     public String threadId;
-    public String subject;
     public Date receivedAt;
 
     @Relation(entity = EmailKeywordEntity.class, parentColumn = "id", entityColumn = "emailId", projection = {"keyword"})

@@ -35,6 +35,8 @@ import androidx.room.Ignore;
 import androidx.room.Relation;
 import rs.ltt.android.R;
 import rs.ltt.android.ui.AvatarDrawable;
+import rs.ltt.android.util.Keywords;
+import rs.ltt.jmap.common.entity.IdentifiableEmailWithKeywords;
 import rs.ltt.jmap.common.entity.Keyword;
 
 public class ThreadOverviewItem {
@@ -73,38 +75,14 @@ public class ThreadOverviewItem {
     }
 
     public boolean everyHasSeenKeyword() {
-        final List<Email> emails = getOrderedEmails();
-        for (Email email : emails) {
-            if (!email.keywords.contains(Keyword.SEEN)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private KeywordOverwriteEntity getKeywordOverwrite(String keyword) {
-        for(KeywordOverwriteEntity keywordOverwriteEntity : keywordOverwriteEntities) {
-            if (keyword.equals(keywordOverwriteEntity.keyword)) {
-                return keywordOverwriteEntity;
-            }
-        }
-        return null;
+        return Keywords.everyHas(getOrderedEmails(), Keyword.SEEN);
     }
 
     public boolean showAsFlagged() {
-        KeywordOverwriteEntity flaggedOverwrite = getKeywordOverwrite(Keyword.FLAGGED);
-        return flaggedOverwrite != null ? flaggedOverwrite.value : isFlagged();
+        KeywordOverwriteEntity flaggedOverwrite = KeywordOverwriteEntity.getKeywordOverwrite(keywordOverwriteEntities, Keyword.FLAGGED);
+        return flaggedOverwrite != null ? flaggedOverwrite.value : Keywords.anyHas(getOrderedEmails(),Keyword.FLAGGED);
     }
 
-    private boolean isFlagged() {
-        final List<Email> emails = getOrderedEmails();
-        for(Email email : emails) {
-            if (email.keywords.contains(Keyword.FLAGGED)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     public Integer getCount() {
         final int count = threadItemEntities.size();
@@ -205,7 +183,7 @@ public class ThreadOverviewItem {
         return Objects.hashCode(emailId, threadId, getOrderedEmails(), threadItemEntities);
     }
 
-    public static class Email {
+    public static class Email implements IdentifiableEmailWithKeywords {
 
         public String id;
         public String preview;
@@ -236,6 +214,16 @@ public class ThreadOverviewItem {
         @Override
         public int hashCode() {
             return Objects.hashCode(id, preview, threadId, subject, receivedAt, keywords, emailAddresses);
+        }
+
+        @Override
+        public Map<String, Boolean> getKeywords() {
+            return Maps.asMap(keywords, keyword -> true);
+        }
+
+        @Override
+        public String getId() {
+            return id;
         }
     }
 
@@ -326,6 +314,7 @@ public class ThreadOverviewItem {
         }
     }
 
+    //TODO: refactor out into BindingAdapters
     @BindingAdapter("isFlagged")
     public static void setIsFlagged(final ImageView imageView, final boolean isFlagged) {
         if (isFlagged) {
@@ -335,6 +324,7 @@ public class ThreadOverviewItem {
             imageView.setImageResource(R.drawable.ic_star_border_black_24dp);
             ImageViewCompat.setImageTintList(imageView, ColorStateList.valueOf(ContextCompat.getColor(imageView.getContext(), R.color.black54)));
         }
+        imageView.setVisibility(View.VISIBLE);
     }
 
     @BindingAdapter("from")
