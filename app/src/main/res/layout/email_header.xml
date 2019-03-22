@@ -5,6 +5,7 @@
 
     <data>
 
+        <import type="android.view.View" />
         <variable
             name="header"
             type="rs.ltt.android.entity.ThreadHeader" />
@@ -39,6 +40,7 @@
             android:layout_centerVertical="true"
             android:layout_alignParentEnd="true"
             android:layout_marginStart="16dp"
+            android:visibility="@{header == null ? View.GONE : View.VISIBLE}"
             app:isFlagged="@{header.showAsFlagged()}"
             tools:alpha="0.57"
             tools:src="@drawable/ic_star_border_black_24dp" />

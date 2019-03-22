@@ -324,7 +324,6 @@ public class ThreadOverviewItem {
             imageView.setImageResource(R.drawable.ic_star_border_black_24dp);
             ImageViewCompat.setImageTintList(imageView, ColorStateList.valueOf(ContextCompat.getColor(imageView.getContext(), R.color.black54)));
         }
-        imageView.setVisibility(View.VISIBLE);
     }
 
     @BindingAdapter("from")
