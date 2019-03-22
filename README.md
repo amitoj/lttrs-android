@@ -2,7 +2,7 @@
 
 A proof of concept email ([JMAP](https://jmap.io/)) client currently in development. It makes heavy use of [Android Jetpack](https://developer.android.com/jetpack/) for a more maintainable code base than some of the preexisting Android email clients.
 
-<img src="https://gultsch.de/files/lttrs-android.png" height="450"/>
+![screenshot of Ltt.rs for Android](https://gultsch.de/files/lttrs-android.png)
 
 ## jmap-mua
 
