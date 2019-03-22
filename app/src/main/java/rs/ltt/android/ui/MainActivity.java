@@ -1,11 +1,17 @@
 package rs.ltt.android.ui;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
@@ -24,10 +30,15 @@ import rs.ltt.android.ui.fragment.MainMailboxQueryFragmentDirections;
 import rs.ltt.android.ui.model.MailboxListViewModel;
 import rs.ltt.jmap.common.entity.Role;
 
-public class MainActivity extends AppCompatActivity implements AbstractMailboxQueryFragment.OnMailboxOpened {
+public class MainActivity extends AppCompatActivity implements AbstractMailboxQueryFragment.OnMailboxOpened, NavController.OnDestinationChangedListener {
 
     final MailboxListAdapter mailboxListAdapter = new MailboxListAdapter();
     private ActivityMainBinding binding = null;
+
+    private static final List<Integer> DESTINATIONS_SHOWING_DRAWER_BUTTON = Arrays.asList(
+            R.id.inbox,
+            R.id.mailbox
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,16 +46,12 @@ public class MainActivity extends AppCompatActivity implements AbstractMailboxQu
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         MailboxListViewModel mailboxListViewModel = ViewModelProviders.of(this).get(MailboxListViewModel.class);
         setSupportActionBar(binding.toolbar);
-        final ActionBar actionbar = getSupportActionBar();
-        if (actionbar != null) {
-            actionbar.setDisplayHomeAsUpEnabled(true);
-            actionbar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
-        }
+
+        final NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
 
         mailboxListAdapter.setOnMailboxOverviewItemSelectedListener(mailboxOverviewItem -> {
             binding.drawerLayout.closeDrawer(GravityCompat.START);
             final boolean navigateToInbox = mailboxOverviewItem.role == Role.INBOX;
-            final NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
             NavDestination currentDestination = navController.getCurrentDestination();
             if (currentDestination != null && currentDestination.getId() == R.id.inbox) {
                 if (navigateToInbox) {
@@ -69,11 +76,43 @@ public class MainActivity extends AppCompatActivity implements AbstractMailboxQu
     }
 
     @Override
+    public void onStart() {
+        final NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        navController.addOnDestinationChangedListener(this);
+        super.onStart();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        final NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        navController.removeOnDestinationChangedListener(this);
+    }
+
+    private void configureActionBarForDestination(NavDestination destination) {
+        final ActionBar actionbar = getSupportActionBar();
+        if (actionbar == null) {
+            return;
+        }
+        final int destinationId = destination.getId();
+        final boolean showMenu = DESTINATIONS_SHOWING_DRAWER_BUTTON.contains(destinationId);
+        actionbar.setDisplayHomeAsUpEnabled(true);
+        actionbar.setHomeAsUpIndicator(showMenu ? R.drawable.ic_menu_black_24dp : R.drawable.ic_arrow_back_white_24dp);
+        actionbar.setDisplayShowTitleEnabled(destinationId != R.id.thread);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                binding.drawerLayout.openDrawer(GravityCompat.START);
-                return true;
+                final NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+                final NavDestination currentDestination = navController.getCurrentDestination();
+                if (currentDestination != null && DESTINATIONS_SHOWING_DRAWER_BUTTON.contains(currentDestination.getId())) {
+                    binding.drawerLayout.openDrawer(GravityCompat.START);
+                    return true;
+                } else {
+                    onBackPressed();
+                }
         }
         return super.onOptionsItemSelected(item);
 
@@ -92,5 +131,10 @@ public class MainActivity extends AppCompatActivity implements AbstractMailboxQu
             return;
         }
         super.onBackPressed();
+    }
+
+    @Override
+    public void onDestinationChanged(@NonNull NavController controller, @NonNull NavDestination destination, @Nullable Bundle arguments) {
+        configureActionBarForDestination(destination);
     }
 }
