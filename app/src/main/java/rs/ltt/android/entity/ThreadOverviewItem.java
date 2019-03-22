@@ -294,7 +294,7 @@ public class ThreadOverviewItem {
             textView.setVisibility(View.GONE);
         } else {
             textView.setVisibility(View.VISIBLE);
-            if (isToday(receivedAt)) {
+            if (isToday(receivedAt)) { //TODO or less than 6 hours ago
                 textView.setText(TIME_FORMAT.format(receivedAt));
             } else {
                 textView.setText(DATE_FORMAT.format(receivedAt));

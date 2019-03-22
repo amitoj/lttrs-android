@@ -2,6 +2,8 @@ package rs.ltt.android.ui.fragment;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -21,6 +23,12 @@ public class ThreadFragment extends Fragment implements OnFlaggedToggled {
     private ThreadViewModel threadViewModel;
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         final String threadId = ThreadFragmentArgs.fromBundle(getArguments()).getThread();
@@ -32,6 +40,12 @@ public class ThreadFragment extends Fragment implements OnFlaggedToggled {
         threadViewModel.getHeader().observe(this, threadAdapter::setThreadHeader);
         threadAdapter.setOnFlaggedToggledListener(this);
         return binding.getRoot();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.fragment_thread, menu);
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override

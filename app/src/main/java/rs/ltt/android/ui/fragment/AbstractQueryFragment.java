@@ -3,6 +3,8 @@ package rs.ltt.android.ui.fragment;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -25,8 +27,10 @@ public abstract class AbstractQueryFragment extends Fragment implements OnFlagge
 
     private FragmentThreadListBinding binding;
 
-    public AbstractQueryFragment() {
-        // Required empty public constructor
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
 
@@ -62,6 +66,12 @@ public abstract class AbstractQueryFragment extends Fragment implements OnFlagge
         threadOverviewAdapter.setOnFlaggedToggledListener(this);
         threadOverviewAdapter.setOnThreadClickedListener(this);
         return binding.getRoot();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.fragment_query, menu);
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override

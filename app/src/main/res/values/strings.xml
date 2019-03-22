@@ -1,6 +1,9 @@
 <resources>
-    <string name="app_name">Lttrs</string>
+    <string name="app_name">Ltt.rs</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="archive">Archive</string>
+    <string name="mark_unread">Mark unread</string>
+    <string name="delete">Delete</string>
+    <string name="mark_important">Mark important</string>
+    <string name="search">Search</string>
 </resources>
