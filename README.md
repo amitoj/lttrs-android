@@ -1,4 +1,4 @@
-# Lttrs for Android
+# Ltt.rs for Android
 
 A proof of concept email ([JMAP](https://jmap.io/)) client currently in development. It makes heavy use of [Android Jetpack](https://developer.android.com/jetpack/) for a more maintainable code base than some of the preexisting Android email clients.
 
@@ -6,7 +6,7 @@ A proof of concept email ([JMAP](https://jmap.io/)) client currently in developm
 
 ## jmap-mua
 
-Lttrs is based on on [jmap-mua](https://github.com/iNPUTmice/jmap) which is basically a headless email client or a library that handles everything an email client would aside from data storage and UI. There is also lttrs-cli which uses the same library.
+Ltt.rs is based on [jmap-mua](https://github.com/iNPUTmice/jmap) which is basically a headless email client or a library that handles everything an email client would aside from data storage and UI. There is also lttrs-cli which uses the same library.
 
 ## Try it
 
