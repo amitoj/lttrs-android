@@ -7,6 +7,15 @@ public class EmailAddress {
     public String email;
     public String name;
 
+
+    public String getEmail() {
+        return this.email;
+    }
+
+    public String getName() {
+        return name == null ? email.split("@")[0] : name;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

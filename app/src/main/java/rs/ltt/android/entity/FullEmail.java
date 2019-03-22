@@ -2,7 +2,6 @@ package rs.ltt.android.entity;
 
 import android.widget.ImageView;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 import java.util.Date;
@@ -39,7 +38,7 @@ public class FullEmail {
     public Map.Entry<String, String> getFrom() {
         for(EmailAddress emailAddress : emailAddresses) {
             if (emailAddress.type == EmailAddressType.FROM) {
-                return Maps.immutableEntry(emailAddress.name, emailAddress.email);
+                return Maps.immutableEntry(emailAddress.getName(), emailAddress.getEmail());
             }
         }
         return null;

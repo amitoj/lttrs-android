@@ -136,11 +136,10 @@ public class ThreadOverviewItem {
             final boolean seen = email.keywords.contains(Keyword.SEEN);
             for (EmailAddress emailAddress : email.emailAddresses) {
                 if (emailAddress.type == EmailAddressType.FROM) {
-                    From from = fromMap.get(emailAddress.email);
+                    From from = fromMap.get(emailAddress.getEmail());
                     if (from == null) {
-                        final String name = emailAddress.name == null ? emailAddress.email.split("@")[0] : emailAddress.name;
-                        from = new From(name, seen);
-                        fromMap.put(emailAddress.email, from);
+                        from = new From(emailAddress.getName(), seen);
+                        fromMap.put(emailAddress.getEmail(), from);
                     } else {
                         from.seen &= seen;
                     }
