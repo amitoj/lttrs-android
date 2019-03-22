@@ -5,6 +5,7 @@ import java.util.Collection;
 import rs.ltt.jmap.common.entity.IdentifiableEmailWithKeywords;
 
 
+//TODO migrate to jmap-common-utils?
 public class Keywords {
 
     public static boolean anyHas(Collection<?extends IdentifiableEmailWithKeywords> emails, String keyword) {

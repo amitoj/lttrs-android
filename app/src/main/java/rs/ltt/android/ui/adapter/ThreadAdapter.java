@@ -102,7 +102,9 @@ public class ThreadAdapter extends RecyclerView.Adapter<ThreadAdapter.AbstractTh
         } else if (holder instanceof ThreadItemViewHolder) {
             ThreadItemViewHolder itemViewHolder = (ThreadItemViewHolder) holder;
             FullEmail email = mDiffer.getItem(position - 1);
+            final boolean lastEmail = mDiffer.getItemCount() == position;
             itemViewHolder.binding.setEmail(email);
+            itemViewHolder.binding.divider.setVisibility(lastEmail ? View.GONE : View.VISIBLE);
         }
 
     }
