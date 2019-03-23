@@ -88,7 +88,6 @@ public class FullEmail {
                 textBody.add(entity);
             }
         }
-        Log.d("lttrs","found "+textBody.size()+" text bodies");
         Collections.sort(textBody, (o1, o2) -> o1.position - o2.position);
         EmailBodyPartEntity first = Iterables.getFirst(textBody, null);
         Map<String,EmailBodyValueEntity> map = Maps.uniqueIndex(bodyValueEntities,value->value.partId);

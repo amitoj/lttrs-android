@@ -32,6 +32,7 @@ import rs.ltt.android.entity.EmailEmailAddressEntity;
 import rs.ltt.android.entity.EmailEntity;
 import rs.ltt.android.entity.EmailKeywordEntity;
 import rs.ltt.android.entity.EmailMailboxEntity;
+import rs.ltt.android.entity.EmailWithMailboxes;
 import rs.ltt.android.entity.EntityStateEntity;
 import rs.ltt.android.entity.EntityType;
 import rs.ltt.android.entity.FullEmail;
@@ -76,6 +77,10 @@ public abstract class EmailDao extends AbstractEntityDao<Email> {
     public abstract List<EmailWithKeywords> getEmailsWithKeywords(String threadId);
 
     @Transaction
+    @Query("select id from email where threadId=:threadId")
+    public abstract List<EmailWithMailboxes> getEmailsWithMailboxes(String threadId);
+
+    @Transaction
     @Query("select id,receivedAt,preview,email.threadId from thread_item join email on thread_item.emailId=email.id where thread_item.threadId=:threadId order by position")
     public abstract DataSource.Factory<Integer, FullEmail> getEmails(String threadId);
 
@@ -101,6 +106,9 @@ public abstract class EmailDao extends AbstractEntityDao<Email> {
 
     @Query("delete from keyword_overwrite where threadId=(select threadId from email where id=:emailId)")
     protected abstract void deleteKeywordToggle(String emailId);
+
+    @Query("update query_item_overwrite set executed=1 where threadId IN(select email.threadid from email where email.id=:emailId)")
+    protected abstract int markAsExecuted(String emailId);
 
     @Transaction
     public void add(final TypedState<Email> expectedState, Email[] email) {
@@ -157,6 +165,8 @@ public abstract class EmailDao extends AbstractEntityDao<Email> {
                 }
 
                 deleteKeywordToggle(email.getId());
+                int count = markAsExecuted(email.getId());
+                Log.d("lttrs","marked "+count+" as executed");
 
             }
         }

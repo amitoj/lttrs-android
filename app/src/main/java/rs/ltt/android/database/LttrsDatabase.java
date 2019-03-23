@@ -25,8 +25,8 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 import rs.ltt.android.database.dao.EmailDao;
-import rs.ltt.android.database.dao.KeywordToggleDao;
 import rs.ltt.android.database.dao.MailboxDao;
+import rs.ltt.android.database.dao.OverwriteDao;
 import rs.ltt.android.database.dao.QueryDao;
 import rs.ltt.android.database.dao.StateDao;
 import rs.ltt.android.database.dao.ThreadDao;
@@ -41,6 +41,7 @@ import rs.ltt.android.entity.KeywordOverwriteEntity;
 import rs.ltt.android.entity.MailboxEntity;
 import rs.ltt.android.entity.QueryEntity;
 import rs.ltt.android.entity.QueryItemEntity;
+import rs.ltt.android.entity.QueryItemOverwriteEntity;
 import rs.ltt.android.entity.ThreadEntity;
 import rs.ltt.android.entity.ThreadItemEntity;
 
@@ -56,7 +57,8 @@ import rs.ltt.android.entity.ThreadItemEntity;
         EmailBodyPartEntity.class,
         QueryEntity.class,
         QueryItemEntity.class,
-        KeywordOverwriteEntity.class
+        KeywordOverwriteEntity.class,
+        QueryItemOverwriteEntity.class
 }, version = 1)
 @TypeConverters(Converters.class)
 public abstract class LttrsDatabase extends RoomDatabase {
@@ -73,7 +75,7 @@ public abstract class LttrsDatabase extends RoomDatabase {
 
     public abstract QueryDao queryDao();
 
-    public abstract KeywordToggleDao keywordToggleDao();
+    public abstract OverwriteDao overwriteDao();
 
     public static LttrsDatabase getInstance(final Context context, final String account) {
         final LttrsDatabase instance = INSTANCES.get(account);

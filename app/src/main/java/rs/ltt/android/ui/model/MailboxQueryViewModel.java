@@ -64,7 +64,9 @@ public class MailboxQueryViewModel extends AbstractQueryViewModel {
         if (emailQuery == null) {
             throw new IllegalStateException("No query associated with this MailboxQueryViewModel");
         }
-        Log.d("lttrs","remove "+item.emailId+" from "+mailbox.name);
+        Log.d("lttrs", "remove " + item.emailId + " from " + mailbox.name);
+
+        queryRepository.removeFromMailbox(item.threadId, mailbox, emailQuery);
     }
 
 

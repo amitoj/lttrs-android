@@ -21,12 +21,14 @@ import java.util.List;
 
 import androidx.paging.DataSource;
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Transaction;
 import rs.ltt.android.entity.EntityType;
 import rs.ltt.android.entity.QueryEntity;
 import rs.ltt.android.entity.QueryItemEntity;
+import rs.ltt.android.entity.QueryItemOverwriteEntity;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.jmap.common.entity.AddedItem;
 import rs.ltt.jmap.common.entity.Email;
@@ -49,8 +51,11 @@ public abstract class QueryDao extends AbstractEntityDao<Email> {
     @Insert
     abstract void insert(QueryItemEntity entity);
 
+    @Query("delete from query_item_overwrite where executed=1 and queryId=:queryId")
+    abstract int deleteAllExecuted(Long queryId);
+
     @Query("select * from `query` where queryString=:queryString limit 1")
-    abstract QueryEntity get(String queryString);
+    public abstract QueryEntity get(String queryString);
 
     @Query("select max(position) from query_item where queryId=:queryId")
     abstract int getMaxPosition(Long queryId);
@@ -58,7 +63,7 @@ public abstract class QueryDao extends AbstractEntityDao<Email> {
     //we inner join on threads here to make sure that we only return items that we actually have
     //due to the delay of fetchMissing we might have query_items that we do not have a corresponding thread for
     @Transaction
-    @Query("select query_item.threadId,query_item.emailId from `query` join query_item on `query`.id = query_item.queryId inner join thread on query_item.threadId=thread.threadId where queryString=:queryString order by position asc")
+    @Query("select query_item.threadId,query_item.emailId from `query` join query_item on `query`.id = query_item.queryId inner join thread on query_item.threadId=thread.threadId where queryString=:queryString  and  query_item.threadId not in (select threadId from query_item_overwrite where queryId=`query`.id) order by position asc")
     public abstract DataSource.Factory<Integer, ThreadOverviewItem> getThreadOverviewItems(String queryString);
 
     @Transaction
@@ -121,13 +126,17 @@ public abstract class QueryDao extends AbstractEntityDao<Email> {
         final String newState = queryUpdate.getNewTypedState().getState();
         final String oldState = queryUpdate.getOldTypedState().getState();
         if (newState.equals(getQueryState(queryString))) {
-            Log.d("lttrs","nothing to do. query already at newest state");
+            Log.d("lttrs", "nothing to do. query already at newest state");
             return;
         }
         throwOnCacheConflict(EntityType.EMAIL, emailState);
         final QueryEntity queryEntity = getQueryEntity(queryString);
+
+        int count = deleteAllExecuted(queryEntity.id);
+        Log.d("lttrs","deleted "+count+" query overwrites");
+
         for (String emailId : queryUpdate.getRemoved()) {
-            Log.d("lttrs", "delting emailId=" + emailId + " from queryId=" + queryEntity.id);
+            Log.d("lttrs", "deleting emailId=" + emailId + " from queryId=" + queryEntity.id);
             decrementAllPositionsFrom(queryEntity.id, emailId);
             deleteQueryItem(queryEntity.id, emailId);
         }
@@ -136,7 +145,7 @@ public abstract class QueryDao extends AbstractEntityDao<Email> {
             Log.d("lttrs", "increment all positions where queryId=" + queryEntity.id + " and position=" + addedItem.getIndex());
 
             if (incrementAllPositionsFrom(queryEntity.id, addedItem.getIndex()) == 0) {
-                Log.d("lttrs","ignoring query item change at position = "+addedItem.getIndex());
+                Log.d("lttrs", "ignoring query item change at position = " + addedItem.getIndex());
                 continue;
             }
             Log.d("lttrs", "insert queryItemEntity on position " + addedItem.getIndex() + " and id=" + queryEntity.id);

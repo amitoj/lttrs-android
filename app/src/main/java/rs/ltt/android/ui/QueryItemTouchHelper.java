@@ -63,6 +63,14 @@ public class QueryItemTouchHelper extends ItemTouchHelper.SimpleCallback {
         }
     }
 
+    @Override
+    public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+        if (viewHolder instanceof ThreadOverviewAdapter.ThreadOverviewViewHolder) {
+            ThreadOverviewAdapter.ThreadOverviewViewHolder threadOverviewViewHolder = (ThreadOverviewAdapter.ThreadOverviewViewHolder) viewHolder;
+            getDefaultUIUtil().clearView(threadOverviewViewHolder.binding.foreground);
+        }
+    }
+
     public void setOnQueryItemSwipeListener(OnQueryItemSwipe listener) {
         this.onQueryItemSwipe = listener;
     }

@@ -59,8 +59,6 @@ public class QueryRepository extends LttrsRepository {
     private MutableLiveData<Set<String>> runningQueriesLiveData = new MutableLiveData<>(runningQueries);
     private MutableLiveData<Set<String>> runningPagingRequestsLiveData = new MutableLiveData<>(runningPagingRequests);
 
-    private final Executor ioExecutor = Executors.newSingleThreadExecutor();
-
 
     public QueryRepository(Application application) {
         super(application);
@@ -153,35 +151,5 @@ public class QueryRepository extends LttrsRepository {
                 Log.d("lttrs", "error paging ", e);
             }
         }, MoreExecutors.directExecutor());
-    }
-
-    private void insert(KeywordOverwriteEntity keywordOverwriteEntity) {
-        Log.d("lttrs","db insert keyword overwrite "+keywordOverwriteEntity.value);
-        ioExecutor.execute(() -> database.keywordToggleDao().insert(keywordOverwriteEntity));
-    }
-
-    public void toggleFlagged(final String threadId, final boolean targetState) {
-        final KeywordOverwriteEntity keywordOverwriteEntity = new KeywordOverwriteEntity(threadId, Keyword.FLAGGED, targetState);
-        insert(keywordOverwriteEntity);
-
-        final Data inputData = new Data.Builder()
-                .putString("threadId", threadId)
-                .putString("keyword", Keyword.FLAGGED)
-                .putBoolean("target", targetState)
-                .build();
-
-        Constraints constraints = new Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .build();
-
-
-        final String uniqueWorkName = "toggle-keyword-" + Keyword.FLAGGED + "-" + threadId;
-
-        OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(ModifyKeywordWorker.class)
-                .setConstraints(constraints)
-                .setInputData(inputData)
-                .build();
-        WorkManager workManager = WorkManager.getInstance();
-        workManager.enqueueUniqueWork(uniqueWorkName, ExistingWorkPolicy.REPLACE, workRequest);
     }
 }
