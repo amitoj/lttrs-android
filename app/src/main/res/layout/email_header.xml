@@ -33,9 +33,7 @@
         android:minHeight="48dp"
         android:orientation="vertical"
         android:paddingTop="12dp"
-        android:paddingBottom="12dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp">
+        android:paddingBottom="12dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -43,6 +41,7 @@
             android:text="@{header.subject}"
             android:textAppearance="?textAppearanceHeadline5"
             android:textSize="22sp"
+            android:layout_marginStart="16dp"
             android:layout_alignParentStart="true"
             android:layout_toStartOf="@+id/star_toggle"
             android:layout_centerVertical="true"
@@ -55,6 +54,7 @@
             android:layout_centerVertical="true"
             android:layout_alignParentEnd="true"
             android:layout_marginStart="16dp"
+            android:layout_marginEnd="12dp"
             android:visibility="@{header == null ? View.GONE : View.VISIBLE}"
             app:isFlagged="@{header.showAsFlagged()}"
             tools:alpha="0.57"

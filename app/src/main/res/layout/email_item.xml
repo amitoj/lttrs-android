@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright 2019 Daniel Gultsch
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -19,10 +18,15 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+        <import type="android.view.View" />
 
         <variable
             name="email"
             type="rs.ltt.android.entity.FullEmail" />
+
+        <variable
+            name="expanded"
+            type="boolean"/>
     </data>
 
     <LinearLayout
@@ -35,7 +39,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?selectableItemBackground"
-            android:clickable="true"
             android:minHeight="88dp">
 
             <ImageView
@@ -69,6 +72,7 @@
                 android:layout_toEndOf="@id/avatar"
                 android:ellipsize="end"
                 android:maxLines="2"
+                android:visibility="@{expanded ? View.GONE : View.VISIBLE}"
                 android:text="@{email.getPreview()}"
                 android:textAppearance="?textAppearanceBody2"
                 app:firstBaselineToTopHeight="20sp"
@@ -89,15 +93,49 @@
                 android:textAppearance="?textAppearanceCaption"
                 tools:text="Mar 24" />
 
+            <ImageButton
+                android:visibility="@{expanded ? View.VISIBLE : View.GONE}"
+                android:id="@+id/reply_all"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toStartOf="@+id/forward"
+                android:padding="12dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_reply_all_black_24dp" />
+
+            <ImageButton
+                android:visibility="@{expanded ? View.VISIBLE : View.GONE}"
+                android:id="@+id/forward"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:padding="12dp"
+                android:layout_toStartOf="@+id/more_options"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_forward_black_24dp" />
+
+            <ImageButton
+                android:visibility="@{expanded ? View.VISIBLE : View.GONE}"
+                android:id="@+id/more_options"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:padding="2dp"
+                android:layout_marginEnd="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_more_vert_black_24dp" />
+
 
         </RelativeLayout>
 
         <LinearLayout
+            android:visibility="@{expanded ? View.VISIBLE : View.GONE}"
             android:id="@+id/body"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone">
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/text"
@@ -108,7 +146,6 @@
                 android:text="@{email.getText()}"
                 android:textAppearance="?textAppearanceBody2"
                 tools:text="Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores" />
-
 
 
         </LinearLayout>

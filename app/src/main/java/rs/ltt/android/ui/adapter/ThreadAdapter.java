@@ -19,8 +19,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 import androidx.annotation.NonNull;
@@ -130,8 +128,12 @@ public class ThreadAdapter extends RecyclerView.Adapter<ThreadAdapter.AbstractTh
             itemViewHolder.binding.setEmail(email);
             itemViewHolder.binding.divider.setVisibility(lastEmail ? View.GONE : View.VISIBLE);
             final boolean expanded = email != null && expandedItems.contains(email.id);
-            itemViewHolder.binding.body.setVisibility(expanded ? View.VISIBLE : View.GONE);
-            itemViewHolder.binding.preview.setVisibility(expanded ? View.GONE : View.VISIBLE);
+            if (expanded) {
+                Touch.expandTouchArea(itemViewHolder.binding.header, itemViewHolder.binding.moreOptions, 8);
+            } else {
+                itemViewHolder.binding.header.setTouchDelegate(null);
+            }
+            itemViewHolder.binding.setExpanded(expanded);
             itemViewHolder.binding.header.setOnClickListener(v -> {
                 if (expandedItems.contains(email.id)) {
                     expandedItems.remove(email.id);
