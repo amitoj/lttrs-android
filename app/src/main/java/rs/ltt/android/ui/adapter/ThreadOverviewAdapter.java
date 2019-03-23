@@ -15,10 +15,8 @@
 
 package rs.ltt.android.ui.adapter;
 
-import android.graphics.Rect;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.TouchDelegate;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -110,6 +108,11 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
     }
 
     @Override
+    public ThreadOverviewItem getItem(int position) {
+        return super.getItem(position);
+    }
+
+    @Override
     public int getItemViewType(int position) {
         return position < super.getItemCount() ? THREAD_ITEM_VIEW_TYPE : LOADING_ITEM_VIEW_TYPE;
     }
@@ -137,7 +140,7 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
 
     public class ThreadOverviewViewHolder extends AbstractThreadOverviewViewHolder {
 
-        final ThreadOverviewItemBinding binding;
+        final public ThreadOverviewItemBinding binding;
 
         ThreadOverviewViewHolder(@NonNull ThreadOverviewItemBinding binding) {
             super(binding.getRoot());

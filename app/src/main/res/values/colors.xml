@@ -23,4 +23,5 @@
     <color name="black26">#42000000</color>
     <color name="black12">#1f000000</color>
     <color name="primary12">#1f008577</color>
+    <color name="white">#ffffffff</color>
 </resources>

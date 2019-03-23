@@ -18,6 +18,7 @@ package rs.ltt.android.ui.fragment;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModelProviders;
 import rs.ltt.android.entity.MailboxOverviewItem;
+import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.android.ui.model.AbstractQueryViewModel;
 import rs.ltt.android.ui.model.MailboxQueryViewModel;
 import rs.ltt.android.ui.model.MailboxViewModelFactory;
@@ -57,6 +59,17 @@ public abstract class AbstractMailboxQueryFragment extends AbstractQueryFragment
                 ((OnMailboxOpened) activity).onMailboxOpened(mailboxOverviewItem);
             }
         });
+    }
+
+    @Override
+    protected boolean onQueryItemSwipe(ThreadOverviewItem item) {
+        return true;
+    }
+
+    @Override
+    protected void onQueryItemSwiped(ThreadOverviewItem item) {
+        mailboxQueryViewModel.archive(item);
+
     }
 
     public interface OnMailboxOpened {

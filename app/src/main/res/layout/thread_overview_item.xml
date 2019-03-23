@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright 2019 Daniel Gultsch
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,97 +24,117 @@
             type="rs.ltt.android.entity.ThreadOverviewItem" />
     </data>
 
-    <RelativeLayout
-        android:layout_width="match_parent"
+    <FrameLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="?selectableItemBackground"
-        android:minHeight="88dp"
-        android:orientation="vertical"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp">
+        android:minHeight="88dp">
 
-        <ImageView
-            android:id="@+id/avatar"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            app:from="@{thread.getFrom()}"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/colorPrimaryDark">
 
-        <TextView
-            android:id="@+id/froms"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/avatar"
-            android:maxLines="1"
-            android:text="@{thread.getFromValues()}"
-            android:textAppearance="?textAppearanceSubtitle1"
-            app:firstBaselineToTopHeight="28dp"
-            tools:text="Juliet, Mercutio, Benvolio" />
+        </RelativeLayout>
 
-        <TextView
-            android:id="@+id/subject"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/froms"
-            android:layout_toStartOf="@+id/star_toggle"
-            android:layout_toEndOf="@id/avatar"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="@{thread.subject}"
-            android:textAppearance="?textAppearanceBody2"
-            android:typeface='@{thread.everyHasSeenKeyword() ? "normal" : "bold"}'
-            app:firstBaselineToTopHeight="20sp"
-            tools:text="The awesome subject line" />
 
-        <TextView
-            android:id="@+id/thread_count"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@id/froms"
-            android:layout_marginStart="8sp"
-            android:layout_toStartOf="@id/date"
-            android:layout_toEndOf="@id/froms"
-            android:maxLines="1"
-            android:text="@{thread.getCount}"
-            android:textAppearance="?textAppearanceBody2"
-            tools:text="2" />
+        <FrameLayout
+            android:id="@+id/foreground"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/white">
 
-        <TextView
-            android:id="@+id/date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@id/froms"
-            android:layout_alignParentEnd="true"
-            android:layout_marginStart="8sp"
-            android:maxLines="1"
-            android:text="@{thread.getReceivedAt}"
-            android:textAppearance="?textAppearanceCaption"
-            tools:text="Mar 24" />
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?selectableItemBackground"
+                android:orientation="vertical"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
 
-        <TextView
-            android:id="@+id/preview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/subject"
-            android:layout_toStartOf="@+id/star_toggle"
-            android:layout_toEndOf="@id/avatar"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="@{thread.preview}"
-            android:textAppearance="?textAppearanceBody2"
-            tools:text="A short excerpt of the full email which fill the entire line like in this example" />
+                <ImageView
+                    android:id="@+id/avatar"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="16dp"
+                    app:from="@{thread.getFrom()}" />
 
-        <ImageView
-            android:id="@+id/star_toggle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@id/preview"
-            android:layout_alignParentEnd="true"
-            android:layout_marginStart="8sp"
-            android:baselineAlignBottom="true"
-            app:isFlagged="@{thread.showAsFlagged()}"
-            tools:alpha="0.57"
-            tools:src="@drawable/ic_star_border_black_24dp" />
-    </RelativeLayout>
+                <TextView
+                    android:id="@+id/froms"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@id/avatar"
+                    android:maxLines="1"
+                    android:text="@{thread.getFromValues()}"
+                    android:textAppearance="?textAppearanceSubtitle1"
+                    app:firstBaselineToTopHeight="28dp"
+                    tools:text="Juliet, Mercutio, Benvolio" />
+
+                <TextView
+                    android:id="@+id/subject"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/froms"
+                    android:layout_toStartOf="@+id/star_toggle"
+                    android:layout_toEndOf="@id/avatar"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="@{thread.subject}"
+                    android:textAppearance="?textAppearanceBody2"
+                    android:typeface='@{thread.everyHasSeenKeyword() ? "normal" : "bold"}'
+                    app:firstBaselineToTopHeight="20sp"
+                    tools:text="The awesome subject line" />
+
+                <TextView
+                    android:id="@+id/thread_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@id/froms"
+                    android:layout_marginStart="8sp"
+                    android:layout_toStartOf="@id/date"
+                    android:layout_toEndOf="@id/froms"
+                    android:maxLines="1"
+                    android:text="@{thread.getCount}"
+                    android:textAppearance="?textAppearanceBody2"
+                    tools:text="2" />
+
+                <TextView
+                    android:id="@+id/date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@id/froms"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginStart="8sp"
+                    android:maxLines="1"
+                    android:text="@{thread.getReceivedAt}"
+                    android:textAppearance="?textAppearanceCaption"
+                    tools:text="Mar 24" />
+
+                <TextView
+                    android:id="@+id/preview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/subject"
+                    android:layout_toStartOf="@+id/star_toggle"
+                    android:layout_toEndOf="@id/avatar"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="@{thread.preview}"
+                    android:textAppearance="?textAppearanceBody2"
+                    tools:text="A short excerpt of the full email which fill the entire line like in this example" />
+
+                <ImageView
+                    android:id="@+id/star_toggle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@id/preview"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginStart="8sp"
+                    android:baselineAlignBottom="true"
+                    app:isFlagged="@{thread.showAsFlagged()}"
+                    tools:alpha="0.57"
+                    tools:src="@drawable/ic_star_border_black_24dp" />
+            </RelativeLayout>
+        </FrameLayout>
+    </FrameLayout>
 </layout>

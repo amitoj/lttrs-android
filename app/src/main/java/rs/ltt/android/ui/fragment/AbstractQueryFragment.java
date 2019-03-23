@@ -28,19 +28,24 @@ import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import rs.ltt.android.MainNavDirections;
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.FragmentThreadListBinding;
+import rs.ltt.android.entity.ThreadOverviewItem;
+import rs.ltt.android.ui.QueryItemTouchHelper;
 import rs.ltt.android.ui.adapter.OnFlaggedToggled;
 import rs.ltt.android.ui.adapter.ThreadOverviewAdapter;
 import rs.ltt.android.ui.model.AbstractQueryViewModel;
 
 
-public abstract class AbstractQueryFragment extends Fragment implements OnFlaggedToggled, ThreadOverviewAdapter.OnThreadClicked {
+public abstract class AbstractQueryFragment extends Fragment implements OnFlaggedToggled, ThreadOverviewAdapter.OnThreadClicked, QueryItemTouchHelper.OnQueryItemSwipe {
 
     private FragmentThreadListBinding binding;
+
+    private final ThreadOverviewAdapter threadOverviewAdapter = new ThreadOverviewAdapter();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -54,7 +59,6 @@ public abstract class AbstractQueryFragment extends Fragment implements OnFlagge
         super.onCreateView(inflater, container, savedInstanceState);
         final AbstractQueryViewModel viewModel = getQueryViewModel();
         this.binding = DataBindingUtil.inflate(inflater, R.layout.fragment_thread_list, container, false);
-        final ThreadOverviewAdapter threadOverviewAdapter = new ThreadOverviewAdapter();
         viewModel.getThreadOverviewItems().observe(this, threadOverviewItems -> {
             final RecyclerView.LayoutManager layoutManager = binding.threadList.getLayoutManager();
             final boolean atTop;
@@ -80,6 +84,13 @@ public abstract class AbstractQueryFragment extends Fragment implements OnFlagge
         viewModel.isRunningPagingRequest().observe(this, threadOverviewAdapter::setLoading);
         threadOverviewAdapter.setOnFlaggedToggledListener(this);
         threadOverviewAdapter.setOnThreadClickedListener(this);
+
+        final QueryItemTouchHelper queryItemTouchHelper = new QueryItemTouchHelper();
+
+        queryItemTouchHelper.setOnQueryItemSwipeListener(this);
+
+        new ItemTouchHelper(queryItemTouchHelper).attachToRecyclerView(binding.threadList);
+
         return binding.getRoot();
     }
 
@@ -101,4 +112,26 @@ public abstract class AbstractQueryFragment extends Fragment implements OnFlagge
         final NavController navController = Navigation.findNavController(getActivity(), R.id.nav_host_fragment);
         navController.navigate(MainNavDirections.actionToThread(threadId));
     }
+
+    @Override
+    public boolean onQueryItemSwipe(int position) {
+        final ThreadOverviewItem item = threadOverviewAdapter.getItem(position);
+        if (item == null) {
+            throw new IllegalStateException("Swipe Item not found");
+        }
+        return onQueryItemSwipe(item);
+    }
+
+    protected abstract boolean onQueryItemSwipe(ThreadOverviewItem item);
+
+    @Override
+    public void onQueryItemSwiped(int position) {
+        final ThreadOverviewItem item = threadOverviewAdapter.getItem(position);
+        if (item == null) {
+            throw new IllegalStateException("Swipe Item not found");
+        }
+        onQueryItemSwiped(item);
+    }
+
+    protected abstract void onQueryItemSwiped(ThreadOverviewItem item);
 }

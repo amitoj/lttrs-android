@@ -25,9 +25,10 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.databinding.BindingAdapter;
 import rs.ltt.android.R;
+import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
 import rs.ltt.jmap.common.entity.Role;
 
-public class MailboxOverviewItem {
+public class MailboxOverviewItem implements IdentifiableMailboxWithRole {
 
     @NonNull public String id;
 
@@ -99,5 +100,15 @@ public class MailboxOverviewItem {
             }
         }
         imageView.setImageResource(imageResource);
+    }
+
+    @Override
+    public Role getRole() {
+        return this.role;
+    }
+
+    @Override
+    public String getId() {
+        return id;
     }
 }
