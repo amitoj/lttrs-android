@@ -49,7 +49,7 @@ public class ThreadFragment extends Fragment implements OnFlaggedToggled {
         final String threadId = ThreadFragmentArgs.fromBundle(getArguments()).getThread();
         threadViewModel = ViewModelProviders.of(this, new ThreadViewModelFactory(getActivity().getApplication(), threadId)).get(ThreadViewModel.class);
         FragmentThreadBinding binding = DataBindingUtil.inflate(inflater, R.layout.fragment_thread, container, false);
-        ThreadAdapter threadAdapter = new ThreadAdapter();
+        final ThreadAdapter threadAdapter = new ThreadAdapter(threadViewModel.expandedItems);
         binding.list.setAdapter(threadAdapter);
         threadViewModel.getEmails().observe(this, threadAdapter::submitList);
         threadViewModel.getHeader().observe(this, threadAdapter::setThreadHeader);

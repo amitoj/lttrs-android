@@ -30,6 +30,8 @@ import rs.ltt.android.database.dao.MailboxDao;
 import rs.ltt.android.database.dao.QueryDao;
 import rs.ltt.android.database.dao.StateDao;
 import rs.ltt.android.database.dao.ThreadDao;
+import rs.ltt.android.entity.EmailBodyPartEntity;
+import rs.ltt.android.entity.EmailBodyValueEntity;
 import rs.ltt.android.entity.EmailEmailAddressEntity;
 import rs.ltt.android.entity.EmailEntity;
 import rs.ltt.android.entity.EmailKeywordEntity;
@@ -50,6 +52,8 @@ import rs.ltt.android.entity.ThreadItemEntity;
         EmailEmailAddressEntity.class,
         EmailKeywordEntity.class,
         EmailMailboxEntity.class,
+        EmailBodyValueEntity.class,
+        EmailBodyPartEntity.class,
         QueryEntity.class,
         QueryItemEntity.class,
         KeywordOverwriteEntity.class

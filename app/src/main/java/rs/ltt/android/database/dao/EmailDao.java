@@ -25,6 +25,8 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Transaction;
+import rs.ltt.android.entity.EmailBodyPartEntity;
+import rs.ltt.android.entity.EmailBodyValueEntity;
 import rs.ltt.android.entity.EmailWithKeywords;
 import rs.ltt.android.entity.EmailEmailAddressEntity;
 import rs.ltt.android.entity.EmailEntity;
@@ -62,6 +64,12 @@ public abstract class EmailDao extends AbstractEntityDao<Email> {
 
     @Insert
     abstract void insertKeywords(List<EmailKeywordEntity> entities);
+
+    @Insert
+    abstract void insertEmailBodyValues(List<EmailBodyValueEntity> entities);
+
+    @Insert
+    abstract void insertEmailBodyParts(List<EmailBodyPartEntity> entities);
 
     @Transaction
     @Query("select id from email where threadId=:threadId")
@@ -111,6 +119,8 @@ public abstract class EmailDao extends AbstractEntityDao<Email> {
             insertEmailAddresses(EmailEmailAddressEntity.of(email));
             insertMailboxes(EmailMailboxEntity.of(email));
             insertKeywords(EmailKeywordEntity.of(email));
+            insertEmailBodyParts(EmailBodyPartEntity.of(email));
+            insertEmailBodyValues(EmailBodyValueEntity.of(email));
         }
     }
 

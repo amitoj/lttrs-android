@@ -15,10 +15,18 @@
 
 package rs.ltt.android.entity;
 
+import android.util.Log;
 import android.widget.ImageView;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +49,12 @@ public class FullEmail {
     @Relation(entity = EmailEmailAddressEntity.class, parentColumn = "id", entityColumn = "emailId", projection = {"email", "name", "type"})
     public List<EmailAddress> emailAddresses;
 
+    @Relation(parentColumn = "id", entityColumn = "emailId")
+    public List<EmailBodyPartEntity> bodyPartEntities;
+
+    @Relation(parentColumn = "id", entityColumn = "emailId")
+    public List<EmailBodyValueEntity> bodyValueEntities;
+
     public String getFromAsText() {
         return getFrom().getKey();
     }
@@ -50,7 +64,7 @@ public class FullEmail {
     }
 
     public Map.Entry<String, String> getFrom() {
-        for(EmailAddress emailAddress : emailAddresses) {
+        for (EmailAddress emailAddress : emailAddresses) {
             if (emailAddress.type == EmailAddressType.FROM) {
                 return Maps.immutableEntry(emailAddress.getName(), emailAddress.getEmail());
             }
@@ -61,10 +75,25 @@ public class FullEmail {
     @BindingAdapter("from")
     public static void setFrom(final ImageView imageView, final Map.Entry<String, String> from) {
         if (from == null) {
-            imageView.setImageDrawable(new AvatarDrawable(null,null));
+            imageView.setImageDrawable(new AvatarDrawable(null, null));
         } else {
             imageView.setImageDrawable(new AvatarDrawable(from.getKey(), from.getValue()));
         }
+    }
+
+    public String getText() {
+        final ArrayList<EmailBodyPartEntity> textBody = new ArrayList<>();
+        for(EmailBodyPartEntity entity : bodyPartEntities) {
+            if (entity.bodyPartType == EmailBodyPartType.TEXT_BODY) {
+                textBody.add(entity);
+            }
+        }
+        Log.d("lttrs","found "+textBody.size()+" text bodies");
+        Collections.sort(textBody, (o1, o2) -> o1.position - o2.position);
+        EmailBodyPartEntity first = Iterables.getFirst(textBody, null);
+        Map<String,EmailBodyValueEntity> map = Maps.uniqueIndex(bodyValueEntities,value->value.partId);
+        EmailBodyValueEntity value = map.get(first.partId);
+        return value.value;
     }
 
 }

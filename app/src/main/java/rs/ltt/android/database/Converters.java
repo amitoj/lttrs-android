@@ -17,8 +17,10 @@ package rs.ltt.android.database;
 
 import java.util.Date;
 
+import androidx.room.Delete;
 import androidx.room.TypeConverter;
 import rs.ltt.android.entity.EmailAddressType;
+import rs.ltt.android.entity.EmailBodyPartType;
 import rs.ltt.android.entity.EntityType;
 import rs.ltt.jmap.common.entity.Role;
 
@@ -35,6 +37,8 @@ public class Converters {
         return Role.valueOf(role);
     }
 
+
+
     @TypeConverter
     public static String toString(EntityType entityType) {
         return entityType.toString();
@@ -45,6 +49,8 @@ public class Converters {
         return EntityType.valueOf(entityType);
     }
 
+
+
     @TypeConverter
     public static EmailAddressType toEmailAddressType(String type) {
         return EmailAddressType.valueOf(type);
@@ -52,6 +58,18 @@ public class Converters {
 
     @TypeConverter
     public static String toString(EmailAddressType type) {
+        return type.toString();
+    }
+
+
+
+    @TypeConverter
+    public static EmailBodyPartType toEmailBodyPartType(String type) {
+        return EmailBodyPartType.valueOf(type);
+    }
+
+    @TypeConverter
+    public static String toString(EmailBodyPartType type) {
         return type.toString();
     }
 

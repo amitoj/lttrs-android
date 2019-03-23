@@ -17,6 +17,8 @@ package rs.ltt.android.ui.model;
 
 import android.app.Application;
 
+import java.util.HashSet;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
@@ -34,6 +36,8 @@ public class ThreadViewModel extends AndroidViewModel {
     private LiveData<PagedList<FullEmail>> emails;
 
     private LiveData<ThreadHeader> header;
+
+    public final HashSet<String> expandedItems = new HashSet<>();
 
 
     ThreadViewModel(@NonNull Application application, String threadId) {

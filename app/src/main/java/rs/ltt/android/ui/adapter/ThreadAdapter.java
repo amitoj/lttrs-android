@@ -15,10 +15,13 @@
 
 package rs.ltt.android.ui.adapter;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -59,6 +62,12 @@ public class ThreadAdapter extends RecyclerView.Adapter<ThreadAdapter.AbstractTh
     private ThreadHeader threadHeader;
 
     private OnFlaggedToggled onFlaggedToggled;
+
+    private final Set<String> expandedItems;
+
+    public ThreadAdapter(Set<String> expandedItems) {
+        this.expandedItems = expandedItems;
+    }
 
 
     //we need this rather inconvenient setup instead of simply using PagedListAdapter to allow for
@@ -102,7 +111,7 @@ public class ThreadAdapter extends RecyclerView.Adapter<ThreadAdapter.AbstractTh
     }
 
     @Override
-    public void onBindViewHolder(@NonNull AbstractThreadItemViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull AbstractThreadItemViewHolder holder, final int position) {
         if (holder instanceof ThreadHeaderViewHolder) {
             ThreadHeaderViewHolder headerViewHolder = (ThreadHeaderViewHolder) holder;
             headerViewHolder.binding.setHeader(threadHeader);
@@ -120,6 +129,17 @@ public class ThreadAdapter extends RecyclerView.Adapter<ThreadAdapter.AbstractTh
             final boolean lastEmail = mDiffer.getItemCount() == position;
             itemViewHolder.binding.setEmail(email);
             itemViewHolder.binding.divider.setVisibility(lastEmail ? View.GONE : View.VISIBLE);
+            final boolean expanded = email != null && expandedItems.contains(email.id);
+            itemViewHolder.binding.body.setVisibility(expanded ? View.VISIBLE : View.GONE);
+            itemViewHolder.binding.preview.setVisibility(expanded ? View.GONE : View.VISIBLE);
+            itemViewHolder.binding.header.setOnClickListener(v -> {
+                if (expandedItems.contains(email.id)) {
+                    expandedItems.remove(email.id);
+                } else {
+                    expandedItems.add(email.id);
+                }
+                notifyItemChanged(position);
+            });
         }
 
     }
