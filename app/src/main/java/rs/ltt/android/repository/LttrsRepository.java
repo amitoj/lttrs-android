@@ -52,6 +52,7 @@ import rs.ltt.jmap.client.session.SessionFileCache;
 import rs.ltt.jmap.common.entity.EmailQuery;
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
 import rs.ltt.jmap.common.entity.Keyword;
+import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
 import rs.ltt.jmap.mua.Mua;
 
 public abstract class LttrsRepository {
@@ -90,8 +91,12 @@ public abstract class LttrsRepository {
         });
     }
 
-    public void removeFromMailbox(final String threadId, final IdentifiableMailboxWithRole mailbox, final EmailQuery emailQuery) {
-        insertQueryItemOverwrite(emailQuery.toQueryString(), threadId);
+    public void removeFromMailbox(final String threadId, final IdentifiableMailboxWithRole mailbox) {
+
+        //this is the query that shows the contents of this particular mailbox
+        //we create a temporary overwrite to not show this thread in this query
+        final String queryString = EmailQuery.of(EmailFilterCondition.builder().inMailbox(mailbox.getId()).build(), true).toQueryString();
+        insertQueryItemOverwrite(queryString, threadId);
 
         final Data inputData = new Data.Builder()
                 .putString("threadId", threadId)

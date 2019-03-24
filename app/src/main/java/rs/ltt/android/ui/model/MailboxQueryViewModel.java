@@ -57,16 +57,12 @@ public class MailboxQueryViewModel extends AbstractQueryViewModel {
 
     public void archive(ThreadOverviewItem item) {
         final MailboxOverviewItem mailbox = this.mailbox.getValue();
-        final EmailQuery emailQuery = emailQueryLiveData.getValue();
         if (mailbox == null) {
             throw new IllegalStateException("No mailbox associated with MailboxQueryViewModel");
         }
-        if (emailQuery == null) {
-            throw new IllegalStateException("No query associated with this MailboxQueryViewModel");
-        }
         Log.d("lttrs", "remove " + item.emailId + " from " + mailbox.name);
 
-        queryRepository.removeFromMailbox(item.threadId, mailbox, emailQuery);
+        queryRepository.removeFromMailbox(item.threadId, mailbox);
     }
 
 
