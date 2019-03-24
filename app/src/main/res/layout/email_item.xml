@@ -78,6 +78,21 @@
                 app:firstBaselineToTopHeight="20sp"
                 tools:text="Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores" />
 
+            <TextView
+                android:id="@+id/to"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/from"
+                android:layout_toStartOf="@+id/reply_all"
+                android:layout_toEndOf="@id/avatar"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:visibility="@{expanded ? View.VISIBLE : View.GONE}"
+                app:to="@{email.getTo()}"
+                android:textAppearance="?textAppearanceBody2"
+                app:firstBaselineToTopHeight="20sp"
+                tools:text="to Romeo Montague"/>
+
 
             <TextView
                 android:id="@+id/date"

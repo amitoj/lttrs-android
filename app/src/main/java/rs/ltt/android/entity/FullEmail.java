@@ -15,25 +15,26 @@
 
 package rs.ltt.android.entity;
 
-import android.util.Log;
+import android.content.Context;
 import android.widget.ImageView;
+import android.widget.TextView;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
-
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import androidx.databinding.BindingAdapter;
 import androidx.room.Relation;
+import rs.ltt.android.R;
 import rs.ltt.android.ui.AvatarDrawable;
 
 public class FullEmail {
@@ -83,16 +84,41 @@ public class FullEmail {
 
     public String getText() {
         final ArrayList<EmailBodyPartEntity> textBody = new ArrayList<>();
-        for(EmailBodyPartEntity entity : bodyPartEntities) {
+        for (EmailBodyPartEntity entity : bodyPartEntities) {
             if (entity.bodyPartType == EmailBodyPartType.TEXT_BODY) {
                 textBody.add(entity);
             }
         }
         Collections.sort(textBody, (o1, o2) -> o1.position - o2.position);
         EmailBodyPartEntity first = Iterables.getFirst(textBody, null);
-        Map<String,EmailBodyValueEntity> map = Maps.uniqueIndex(bodyValueEntities,value->value.partId);
+        Map<String, EmailBodyValueEntity> map = Maps.uniqueIndex(bodyValueEntities, value -> value.partId);
         EmailBodyValueEntity value = map.get(first.partId);
         return value.value;
+    }
+
+    public Collection<String> getTo() {
+        LinkedHashMap<String, String> toMap = new LinkedHashMap<>();
+        for (EmailAddress emailAddress : emailAddresses) {
+            if (emailAddress.type == EmailAddressType.TO || emailAddress.type == EmailAddressType.CC) {
+                toMap.put(emailAddress.getEmail(), emailAddress.getName());
+            }
+        }
+        return toMap.values();
+    }
+
+    @BindingAdapter("to")
+    public static void setFroms(final TextView textView, final Collection<String> names) {
+        final boolean shorten = names.size() > 1;
+        StringBuilder builder = new StringBuilder();
+        for (String name : names) {
+            if (builder.length() != 0) {
+                builder.append(", ");
+            }
+            final String shortened = name.split("")[0];
+            builder.append(shorten && shortened.length() > 3 ? shortened : name);
+        }
+        final Context context = textView.getContext();
+        textView.setText(context.getString(R.string.to_x, builder.toString()));
     }
 
 }
