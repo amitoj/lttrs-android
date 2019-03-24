@@ -114,7 +114,7 @@ public abstract class AbstractQueryFragment extends Fragment implements OnFlagge
     }
 
     @Override
-    public boolean onQueryItemSwipe(int position) {
+    public QueryItemTouchHelper.Swipable onQueryItemSwipe(int position) {
         final ThreadOverviewItem item = threadOverviewAdapter.getItem(position);
         if (item == null) {
             throw new IllegalStateException("Swipe Item not found");
@@ -122,7 +122,7 @@ public abstract class AbstractQueryFragment extends Fragment implements OnFlagge
         return onQueryItemSwipe(item);
     }
 
-    protected abstract boolean onQueryItemSwipe(ThreadOverviewItem item);
+    protected abstract QueryItemTouchHelper.Swipable onQueryItemSwipe(ThreadOverviewItem item);
 
     @Override
     public void onQueryItemSwiped(int position) {

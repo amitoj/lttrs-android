@@ -27,9 +27,11 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModelProviders;
 import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.android.entity.ThreadOverviewItem;
+import rs.ltt.android.ui.QueryItemTouchHelper;
 import rs.ltt.android.ui.model.AbstractQueryViewModel;
 import rs.ltt.android.ui.model.MailboxQueryViewModel;
 import rs.ltt.android.ui.model.MailboxViewModelFactory;
+import rs.ltt.jmap.common.entity.Role;
 
 
 public abstract class AbstractMailboxQueryFragment extends AbstractQueryFragment {
@@ -62,8 +64,17 @@ public abstract class AbstractMailboxQueryFragment extends AbstractQueryFragment
     }
 
     @Override
-    protected boolean onQueryItemSwipe(ThreadOverviewItem item) {
-        return true;
+    protected QueryItemTouchHelper.Swipable onQueryItemSwipe(ThreadOverviewItem item) {
+        final MailboxOverviewItem mailbox = mailboxQueryViewModel != null ? mailboxQueryViewModel.getMailbox().getValue() : null;
+        if (mailbox == null) {
+            return QueryItemTouchHelper.Swipable.NO;
+        } else if (mailbox.role == Role.INBOX) {
+            return QueryItemTouchHelper.Swipable.ARCHIVE;
+        } else if (mailbox.role == null) {
+            return QueryItemTouchHelper.Swipable.REMOVE_LABEL;
+        } else {
+            return QueryItemTouchHelper.Swipable.NO;
+        }
     }
 
     @Override

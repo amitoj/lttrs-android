@@ -17,10 +17,12 @@ package rs.ltt.android.ui;
 
 import android.graphics.Canvas;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
+import rs.ltt.android.R;
 import rs.ltt.android.ui.adapter.ThreadOverviewAdapter;
 
 public class QueryItemTouchHelper extends ItemTouchHelper.SimpleCallback {
@@ -39,10 +41,16 @@ public class QueryItemTouchHelper extends ItemTouchHelper.SimpleCallback {
     @Override
     public int getSwipeDirs(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
         if (viewHolder instanceof ThreadOverviewAdapter.ThreadOverviewViewHolder) {
+            final ThreadOverviewAdapter.ThreadOverviewViewHolder threadOverviewViewHolder = (ThreadOverviewAdapter.ThreadOverviewViewHolder) viewHolder;
             if (onQueryItemSwipe != null) {
-                if (onQueryItemSwipe.onQueryItemSwipe(viewHolder.getAdapterPosition())) {
-                    return ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT;
+                final Swipable swipable = onQueryItemSwipe.onQueryItemSwipe(viewHolder.getAdapterPosition());
+                if (swipable == Swipable.NO) {
+                    return 0;
                 }
+                @DrawableRes int swipableIndicatorResource = swipable == Swipable.ARCHIVE ? R.drawable.ic_archive_white_24dp : R.drawable.ic_label_off_white_24dp;
+                threadOverviewViewHolder.binding.endSwipeActionIndicator.setImageResource(swipableIndicatorResource);
+                threadOverviewViewHolder.binding.startSwipeActionIndicator.setImageResource(swipableIndicatorResource);
+                return ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT;
             }
         }
         return 0;
@@ -75,8 +83,12 @@ public class QueryItemTouchHelper extends ItemTouchHelper.SimpleCallback {
         this.onQueryItemSwipe = listener;
     }
 
+    public enum Swipable {
+        NO, ARCHIVE, REMOVE_LABEL
+    }
+
     public interface OnQueryItemSwipe {
-        boolean onQueryItemSwipe(int position);
+        Swipable onQueryItemSwipe(int position);
         void onQueryItemSwiped(int position);
     }
 }
