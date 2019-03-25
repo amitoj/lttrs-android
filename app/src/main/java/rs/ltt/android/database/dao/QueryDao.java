@@ -138,6 +138,8 @@ public abstract class QueryDao extends AbstractEntityDao<Email> {
         for (String emailId : queryUpdate.getRemoved()) {
             Log.d("lttrs", "deleting emailId=" + emailId + " from queryId=" + queryEntity.id);
             decrementAllPositionsFrom(queryEntity.id, emailId);
+
+            //TODO do this on every update
             deleteQueryItem(queryEntity.id, emailId);
         }
         for (AddedItem<QueryResultItem> addedItem : queryUpdate.getAdded()) {

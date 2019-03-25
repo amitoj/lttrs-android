@@ -37,6 +37,9 @@ import rs.ltt.jmap.mua.cache.Update;
 public abstract class MailboxDao extends AbstractEntityDao<Mailbox> {
 
     @Insert
+    protected abstract void insert(MailboxEntity mailboxEntity);
+
+    @Insert
     protected abstract void insert(List<MailboxEntity> mailboxEntities);
 
     @androidx.room.Update
@@ -92,12 +95,8 @@ public abstract class MailboxDao extends AbstractEntityDao<Mailbox> {
             Log.d("lttrs","nothing to do. mailboxes already at newest state");
             return;
         }
-        final List<MailboxEntity> createdEntities = new ArrayList<>();
         for (Mailbox mailbox : update.getCreated()) {
-            createdEntities.add(MailboxEntity.of(mailbox));
-        }
-        if (createdEntities.size() > 0) {
-            insert(createdEntities);
+            insert(MailboxEntity.of(mailbox));
         }
         if (updatedProperties == null) {
             List<MailboxEntity> updatedEntities = new ArrayList<>();

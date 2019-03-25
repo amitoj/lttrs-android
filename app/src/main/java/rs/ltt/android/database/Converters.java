@@ -28,13 +28,13 @@ public class Converters {
 
 
     @TypeConverter
-    public static String toString(Role role) {
-        return role.toString();
+    public static String toString(final Role role) {
+        return role == null ? null : role.toString();
     }
 
     @TypeConverter
     public static Role toRole(String role) {
-        return Role.valueOf(role);
+        return role == null ? null : Role.valueOf(role);
     }
 
 

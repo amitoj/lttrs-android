@@ -77,7 +77,7 @@ public class MailboxOverviewItem implements IdentifiableMailboxWithRole {
     public static void setRole(final ImageView imageView, final Role role) {
         @DrawableRes final int imageResource;
         if (role == null) {
-            imageResource = R.drawable.ic_folder_black_24dp;
+            imageResource = R.drawable.ic_label_black_24dp;
         } else {
             switch (role) {
                 case INBOX:
