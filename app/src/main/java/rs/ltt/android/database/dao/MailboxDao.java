@@ -62,7 +62,10 @@ public abstract class MailboxDao extends AbstractEntityDao<Mailbox> {
     public abstract LiveData<MailboxOverviewItem> getMailboxOverviewItem(String id);
 
     @Query("select distinct mailbox.id,role,name from email join email_mailbox on email_mailbox.emailId=email.id join mailbox on email_mailbox.mailboxId=mailbox.id where threadId=:threadId")
-    public abstract LiveData<List<MailboxWithRoleAndName>> getMailboxesForThread(String threadId);
+    public abstract LiveData<List<MailboxWithRoleAndName>> getMailboxesForThreadLiveData(String threadId);
+
+    @Query("select distinct mailbox.id,role,name from email join email_mailbox on email_mailbox.emailId=email.id join mailbox on email_mailbox.mailboxId=mailbox.id where threadId=:threadId")
+    public abstract List<MailboxWithRoleAndName> getMailboxesForThread(String threadId);
 
     @Query("update mailbox set totalEmails=:value where id=:id")
     public abstract void updateTotalEmails(String id, Integer value);

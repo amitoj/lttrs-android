@@ -16,6 +16,7 @@
 package rs.ltt.android.database.dao;
 
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import rs.ltt.android.entity.KeywordOverwriteEntity;
 import rs.ltt.android.entity.QueryItemOverwriteEntity;
@@ -30,4 +31,7 @@ public abstract class OverwriteDao {
 
     @Insert(onConflict = REPLACE)
     public abstract void insert(QueryItemOverwriteEntity queryItemOverwriteEntity);
+
+    @Delete
+    public abstract void delete(QueryItemOverwriteEntity queryItemOverwriteEntity);
 }

@@ -93,7 +93,7 @@ public class ThreadFragment extends Fragment implements OnFlaggedToggled {
         removeLabelItem.setVisible(menuConfiguration.removeLabel);
         removeLabelItem.setTitle(getString(R.string.remove_label_x, threadViewModel.getLabel()));
         menu.findItem(R.id.action_move_to_inbox).setVisible(menuConfiguration.moveToInbox);
-        menu.findItem(R.id.action_delete).setVisible(menuConfiguration.moveToTrash);
+        menu.findItem(R.id.action_move_to_trash).setVisible(menuConfiguration.moveToTrash);
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -105,6 +105,12 @@ public class ThreadFragment extends Fragment implements OnFlaggedToggled {
                 return true;
             case R.id.action_remove_label:
                 threadViewModel.removeLabel();
+                return true;
+            case R.id.action_move_to_inbox:
+                threadViewModel.moveToInbox();
+                return true;
+            case R.id.action_move_to_trash:
+                threadViewModel.moveToTrash();
                 return true;
             default:
                 return super.onOptionsItemSelected(menuItem);

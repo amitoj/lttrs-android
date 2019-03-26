@@ -32,10 +32,14 @@ import rs.ltt.android.cache.DatabaseCache;
 import rs.ltt.android.database.LttrsDatabase;
 import rs.ltt.android.entity.KeywordOverwriteEntity;
 import rs.ltt.android.entity.MailboxOverviewItem;
+import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.entity.QueryEntity;
 import rs.ltt.android.entity.QueryItemOverwriteEntity;
 import rs.ltt.android.worker.ArchiveWorker;
 import rs.ltt.android.worker.ModifyKeywordWorker;
+import rs.ltt.android.worker.MoveToInboxWorker;
+import rs.ltt.android.worker.MoveToTrashWorker;
+import rs.ltt.android.worker.MuaWorker;
 import rs.ltt.android.worker.RemoveFromMailboxWorker;
 import rs.ltt.jmap.client.session.SessionFileCache;
 import rs.ltt.jmap.common.entity.EmailQuery;
@@ -91,6 +95,21 @@ public abstract class LttrsRepository {
         }
     }
 
+    private void deleteQueryItemOverwrite(final String threadId, final Role role) {
+        MailboxOverviewItem mailbox = database.mailboxDao().getMailboxOverviewItem(role);
+        if (mailbox != null) {
+            deleteQueryItemOverwrite(threadId, mailbox);
+        }
+    }
+
+    private void deleteQueryItemOverwrite(final String threadId, final IdentifiableMailboxWithRole mailbox) {
+        final String queryString = EmailQuery.of(EmailFilterCondition.builder().inMailbox(mailbox.getId()).build(), true).toQueryString();
+        QueryEntity queryEntity = database.queryDao().get(queryString);
+        if (queryEntity != null) {
+            database.overwriteDao().delete(new QueryItemOverwriteEntity(queryEntity.id, threadId));
+        }
+    }
+
     public void removeFromMailbox(final String threadId, final IdentifiableMailboxWithRole mailbox) {
         ioExecutor.execute(() -> {
             insertQueryItemOverwrite(threadId, mailbox);
@@ -99,20 +118,50 @@ public abstract class LttrsRepository {
                     .setInputData(RemoveFromMailboxWorker.data(threadId, mailbox))
                     .build();
             WorkManager workManager = WorkManager.getInstance();
-            workManager.enqueue(workRequest);
+            workManager.enqueueUniqueWork(MuaWorker.SYNC_MAILBOXES, ExistingWorkPolicy.APPEND, workRequest);
         });
     }
 
-    public void archive(String threadId) {
+    public void archive(final String threadId) {
         ioExecutor.execute(() -> {
             insertQueryItemOverwrite(threadId, Role.INBOX);
-            //TODO remove query Overwrite for archive view
+            deleteQueryItemOverwrite(threadId, Role.ARCHIVE);
             OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(ArchiveWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(ArchiveWorker.data(threadId))
                     .build();
             WorkManager workManager = WorkManager.getInstance();
-            workManager.enqueue(workRequest);
+            workManager.enqueueUniqueWork(MuaWorker.SYNC_MAILBOXES, ExistingWorkPolicy.APPEND, workRequest);
+        });
+    }
+
+    public void moveToInbox(final String threadId) {
+        ioExecutor.execute(() -> {
+            insertQueryItemOverwrite(threadId, Role.ARCHIVE);
+            insertQueryItemOverwrite(threadId, Role.TRASH);
+            deleteQueryItemOverwrite(threadId, Role.INBOX);
+            OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(MoveToInboxWorker.class)
+                    .setConstraints(CONNECTED_CONSTRAINT)
+                    .setInputData(MoveToInboxWorker.data(threadId))
+                    .build();
+            WorkManager workManager = WorkManager.getInstance();
+            workManager.enqueueUniqueWork(MuaWorker.SYNC_MAILBOXES, ExistingWorkPolicy.APPEND, workRequest);
+        });
+    }
+
+    public void moveToTrash(final String threadId) {
+        ioExecutor.execute(() -> {
+            for(MailboxWithRoleAndName mailbox : database.mailboxDao().getMailboxesForThread(threadId)) {
+                if (mailbox.role != Role.TRASH) {
+                    insertQueryItemOverwrite(threadId, mailbox);
+                }
+            }
+            OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(MoveToTrashWorker.class)
+                    .setConstraints(CONNECTED_CONSTRAINT)
+                    .setInputData(MoveToTrashWorker.data(threadId))
+                    .build();
+            WorkManager workManager = WorkManager.getInstance();
+            workManager.enqueueUniqueWork(MuaWorker.SYNC_MAILBOXES, ExistingWorkPolicy.APPEND, workRequest);
         });
     }
 

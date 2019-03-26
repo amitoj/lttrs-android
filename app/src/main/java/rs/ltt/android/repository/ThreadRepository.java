@@ -41,6 +41,6 @@ public class ThreadRepository extends LttrsRepository {
     }
 
     public LiveData<List<MailboxWithRoleAndName>> getMailboxes(String threadId) {
-        return database.mailboxDao().getMailboxesForThread(threadId);
+        return database.mailboxDao().getMailboxesForThreadLiveData(threadId);
     }
 }

@@ -103,6 +103,14 @@ public class ThreadViewModel extends AndroidViewModel {
         this.threadRepository.removeFromMailbox(this.threadId, mailbox);
     }
 
+    public void moveToTrash() {
+        this.threadRepository.moveToTrash(this.threadId);
+    }
+
+    public void moveToInbox() {
+        this.threadRepository.moveToInbox(this.threadId);
+    }
+
     public static class MenuConfiguration {
         public final boolean archive;
         public final boolean removeLabel;
