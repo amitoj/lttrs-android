@@ -15,9 +15,16 @@
 
 package rs.ltt.android.ui.fragment;
 
+import rs.ltt.android.entity.ThreadOverviewItem;
+
 public class MainMailboxQueryFragment extends AbstractMailboxQueryFragment {
     @Override
     protected String getMailboxId() {
         return null;
+    }
+
+    @Override
+    protected void onQueryItemSwiped(ThreadOverviewItem item) {
+        mailboxQueryViewModel.archive(item);
     }
 }

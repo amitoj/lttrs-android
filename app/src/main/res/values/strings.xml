@@ -22,4 +22,6 @@
     <string name="mark_important">Mark important</string>
     <string name="search">Search</string>
     <string name="to_x">to %s</string>
+    <string name="move_to_inbox">Move to inbox</string>
+    <string name="remove_label_x">Remove label %s</string>
 </resources>

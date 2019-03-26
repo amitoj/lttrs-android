@@ -18,21 +18,9 @@ package rs.ltt.android.repository;
 import android.app.Application;
 import android.util.Log;
 
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.MoreExecutors;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import androidx.annotation.NonNull;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Transformations;
-import androidx.paging.LivePagedListBuilder;
-import androidx.paging.PagedList;
 import androidx.work.Constraints;
 import androidx.work.Data;
 import androidx.work.ExistingWorkPolicy;
@@ -43,19 +31,25 @@ import rs.ltt.android.Credentials;
 import rs.ltt.android.cache.DatabaseCache;
 import rs.ltt.android.database.LttrsDatabase;
 import rs.ltt.android.entity.KeywordOverwriteEntity;
+import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.android.entity.QueryEntity;
 import rs.ltt.android.entity.QueryItemOverwriteEntity;
-import rs.ltt.android.entity.ThreadOverviewItem;
+import rs.ltt.android.worker.ArchiveWorker;
 import rs.ltt.android.worker.ModifyKeywordWorker;
 import rs.ltt.android.worker.RemoveFromMailboxWorker;
 import rs.ltt.jmap.client.session.SessionFileCache;
 import rs.ltt.jmap.common.entity.EmailQuery;
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
 import rs.ltt.jmap.common.entity.Keyword;
+import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
 import rs.ltt.jmap.mua.Mua;
 
 public abstract class LttrsRepository {
+
+    private static final Constraints CONNECTED_CONSTRAINT = new Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build();
 
     protected final LttrsDatabase database;
 
@@ -77,70 +71,65 @@ public abstract class LttrsRepository {
 
     private void insert(final KeywordOverwriteEntity keywordOverwriteEntity) {
         Log.d("lttrs", "db insert keyword overwrite " + keywordOverwriteEntity.value);
-        ioExecutor.execute(() -> database.overwriteDao().insert(keywordOverwriteEntity));
+        database.overwriteDao().insert(keywordOverwriteEntity);
     }
 
-    private void insertQueryItemOverwrite(final String queryString, final String threadId) {
-        ioExecutor.execute(() -> {
-            QueryEntity queryEntity = database.queryDao().get(queryString);
-            if (queryEntity != null) {
-                database.overwriteDao().insert(new QueryItemOverwriteEntity(queryEntity.id, threadId));
-            } else {
-                Log.d("lttrs","do not enter overwrite");
-            }
-        });
+    private void insertQueryItemOverwrite(final String threadId, final Role role) {
+        MailboxOverviewItem mailbox = database.mailboxDao().getMailboxOverviewItem(role);
+        if (mailbox != null) {
+            insertQueryItemOverwrite(threadId, mailbox);
+        }
+    }
+
+    private void insertQueryItemOverwrite(final String threadId, final IdentifiableMailboxWithRole mailbox) {
+        final String queryString = EmailQuery.of(EmailFilterCondition.builder().inMailbox(mailbox.getId()).build(), true).toQueryString();
+        QueryEntity queryEntity = database.queryDao().get(queryString);
+        if (queryEntity != null) {
+            database.overwriteDao().insert(new QueryItemOverwriteEntity(queryEntity.id, threadId));
+        } else {
+            Log.d("lttrs", "do not enter overwrite");
+        }
     }
 
     public void removeFromMailbox(final String threadId, final IdentifiableMailboxWithRole mailbox) {
+        ioExecutor.execute(() -> {
+            insertQueryItemOverwrite(threadId, mailbox);
+            OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(RemoveFromMailboxWorker.class)
+                    .setConstraints(CONNECTED_CONSTRAINT)
+                    .setInputData(RemoveFromMailboxWorker.data(threadId, mailbox))
+                    .build();
+            WorkManager workManager = WorkManager.getInstance();
+            workManager.enqueue(workRequest);
+        });
+    }
 
-        //this is the query that shows the contents of this particular mailbox
-        //we create a temporary overwrite to not show this thread in this query
-        final String queryString = EmailQuery.of(EmailFilterCondition.builder().inMailbox(mailbox.getId()).build(), true).toQueryString();
-        insertQueryItemOverwrite(queryString, threadId);
-
-        final Data inputData = new Data.Builder()
-                .putString("threadId", threadId)
-                .putString("mailboxId", mailbox.getId())
-                .build();
-
-        Constraints constraints = new Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .build();
-
-
-        final String uniqueWorkName = "remove-from-mailbox-" + mailbox.getId() + "-" + threadId;
-
-        OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(RemoveFromMailboxWorker.class)
-                .setConstraints(constraints)
-                .setInputData(inputData)
-                .build();
-        WorkManager workManager = WorkManager.getInstance();
-        workManager.enqueueUniqueWork(uniqueWorkName, ExistingWorkPolicy.REPLACE, workRequest);
-
+    public void archive(String threadId) {
+        ioExecutor.execute(() -> {
+            insertQueryItemOverwrite(threadId, Role.INBOX);
+            //TODO remove query Overwrite for archive view
+            OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(ArchiveWorker.class)
+                    .setConstraints(CONNECTED_CONSTRAINT)
+                    .setInputData(ArchiveWorker.data(threadId))
+                    .build();
+            WorkManager workManager = WorkManager.getInstance();
+            workManager.enqueue(workRequest);
+        });
     }
 
     public void toggleFlagged(final String threadId, final boolean targetState) {
-        final KeywordOverwriteEntity keywordOverwriteEntity = new KeywordOverwriteEntity(threadId, Keyword.FLAGGED, targetState);
-        insert(keywordOverwriteEntity);
+        toggleKeyword(threadId, Keyword.FLAGGED, targetState);
+    }
 
-        final Data inputData = new Data.Builder()
-                .putString("threadId", threadId)
-                .putString("keyword", Keyword.FLAGGED)
-                .putBoolean("target", targetState)
-                .build();
-
-        Constraints constraints = new Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .build();
-
-
-        final String uniqueWorkName = "toggle-keyword-" + Keyword.FLAGGED + "-" + threadId;
-
-        OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(ModifyKeywordWorker.class)
-                .setConstraints(constraints)
-                .setInputData(inputData)
-                .build();
-        WorkManager workManager = WorkManager.getInstance();
-        workManager.enqueueUniqueWork(uniqueWorkName, ExistingWorkPolicy.REPLACE, workRequest);
+    private void toggleKeyword(final String threadId, final String keyword, final boolean targetState) {
+        ioExecutor.execute(() -> {
+            final KeywordOverwriteEntity keywordOverwriteEntity = new KeywordOverwriteEntity(threadId, keyword, targetState);
+            insert(keywordOverwriteEntity);
+            OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(ModifyKeywordWorker.class)
+                    .setConstraints(CONNECTED_CONSTRAINT)
+                    .setInputData(ModifyKeywordWorker.data(threadId, keyword, targetState))
+                    .build();
+            WorkManager workManager = WorkManager.getInstance();
+            workManager.enqueueUniqueWork(ModifyKeywordWorker.uniqueName(threadId, keyword), ExistingWorkPolicy.REPLACE, workRequest);
+        });
     }
 }

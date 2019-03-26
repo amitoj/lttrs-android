@@ -27,10 +27,15 @@ import androidx.work.Data;
 import androidx.work.WorkerParameters;
 import rs.ltt.android.entity.EmailWithKeywords;
 import rs.ltt.jmap.client.api.MethodErrorResponseException;
+import rs.ltt.jmap.common.entity.Keyword;
 import rs.ltt.jmap.common.method.MethodErrorResponse;
 import rs.ltt.jmap.common.method.error.StateMismatchMethodErrorResponse;
 
 public class ModifyKeywordWorker extends MuaWorker {
+
+    private static final String THREAD_ID_KEY = "threadId";
+    private static final String KEYWORD_KEY = "keyword";
+    private static final String TARGET_STATE_KEY = "target";
 
     private final String threadId;
     private final String keyword;
@@ -39,9 +44,9 @@ public class ModifyKeywordWorker extends MuaWorker {
     public ModifyKeywordWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         final Data data = getInputData();
-        this.threadId = data.getString("threadId");
-        this.keyword = data.getString("keyword");
-        this.target = data.getBoolean("target", false);
+        this.threadId = data.getString(THREAD_ID_KEY);
+        this.keyword = data.getString(KEYWORD_KEY);
+        this.target = data.getBoolean(TARGET_STATE_KEY, false);
     }
 
     @NonNull
@@ -59,26 +64,21 @@ public class ModifyKeywordWorker extends MuaWorker {
             Log.d("lttrs","made changes to "+threadId+": "+madeChanges);
             return Result.success();
         } catch (ExecutionException e) {
-            final Throwable cause = e.getCause();
-            if (cause != null) {
-                if (cause instanceof MethodErrorResponseException) {
-                    MethodErrorResponse methodErrorResponse = ((MethodErrorResponseException) cause).getMethodErrorResponse();
-                    if (methodErrorResponse instanceof StateMismatchMethodErrorResponse) {
-                        Log.d("lttrs", "state mismatch; try again");
-                        return Result.retry();
-                    }
-                    if (methodErrorResponse != null) {
-                        Log.d("lttrs", "method error response " + methodErrorResponse.getType());
-                    }
-                }
-                Log.d("lttrs", "error modifying keyword for thread " + this.threadId, cause);
-                cause.printStackTrace();
-            } else {
-                e.printStackTrace();
-            }
-            return Result.failure();
+            return toResult(e);
         } catch (InterruptedException e) {
             return Result.failure();
         }
+    }
+
+    public static String uniqueName(String threadId, String keyword) {
+        return "toggle-keyword-" + keyword+ "-" + threadId;
+    }
+
+    public static Data data(final String threadId, final String keyword, final boolean targetState) {
+        return new Data.Builder()
+                .putString(THREAD_ID_KEY, threadId)
+                .putString(KEYWORD_KEY, keyword)
+                .putBoolean(TARGET_STATE_KEY, targetState)
+                .build();
     }
 }

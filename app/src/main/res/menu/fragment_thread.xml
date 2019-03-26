@@ -24,6 +24,12 @@
         app:showAsAction="always"/>
 
     <item
+        android:id="@+id/action_remove_label"
+        android:icon="@drawable/ic_label_off_white_24dp"
+        android:title="@string/remove_label_x"
+        app:showAsAction="always"/>
+
+    <item
         android:id="@+id/action_delete"
         android:icon="@drawable/ic_delete_white_24dp"
         android:title="@string/delete"
@@ -34,6 +40,11 @@
         android:icon="@drawable/ic_markunread_white_24dp"
         android:title="@string/mark_unread"
         app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/action_move_to_inbox"
+        android:title="@string/move_to_inbox"
+        app:showAsAction="never"/>
 
     <item
         android:id="@+id/action_mark_important"

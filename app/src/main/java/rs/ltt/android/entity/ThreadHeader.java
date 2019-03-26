@@ -22,6 +22,7 @@ import java.util.Set;
 
 import androidx.room.Relation;
 import rs.ltt.android.util.Keywords;
+import rs.ltt.jmap.common.entity.IdentifiableEmailWithMailboxIds;
 import rs.ltt.jmap.common.entity.Keyword;
 
 public class ThreadHeader {

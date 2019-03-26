@@ -110,7 +110,7 @@ public abstract class AbstractQueryFragment extends Fragment implements OnFlagge
     @Override
     public void onThreadClicked(String threadId) {
         final NavController navController = Navigation.findNavController(getActivity(), R.id.nav_host_fragment);
-        navController.navigate(MainNavDirections.actionToThread(threadId));
+        navController.navigate(MainNavDirections.actionToThread(threadId, null));
     }
 
     @Override

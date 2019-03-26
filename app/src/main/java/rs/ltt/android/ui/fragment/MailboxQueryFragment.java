@@ -16,9 +16,32 @@
 package rs.ltt.android.ui.fragment;
 
 
+import android.os.Bundle;
+
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import rs.ltt.android.MainNavDirections;
+import rs.ltt.android.R;
+import rs.ltt.android.entity.MailboxOverviewItem;
+import rs.ltt.android.entity.ThreadOverviewItem;
+
 public class MailboxQueryFragment extends AbstractMailboxQueryFragment {
     @Override
     protected String getMailboxId() {
-        return MailboxQueryFragmentArgs.fromBundle(getArguments()).getMailbox();
+        final Bundle bundle = getArguments();
+        return MailboxQueryFragmentArgs.fromBundle(bundle == null ? new Bundle() : bundle).getMailbox();
+    }
+
+    @Override
+    public void onThreadClicked(String threadId) {
+        MailboxOverviewItem mailbox = mailboxQueryViewModel.getMailbox().getValue();
+        final NavController navController = Navigation.findNavController(getActivity(), R.id.nav_host_fragment);
+        final String label = mailbox != null && mailbox.role == null ? mailbox.name : null;
+        navController.navigate(MainNavDirections.actionToThread(threadId, label));
+    }
+
+    @Override
+    protected void onQueryItemSwiped(ThreadOverviewItem item) {
+        mailboxQueryViewModel.removeFromMailbox(item);
     }
 }

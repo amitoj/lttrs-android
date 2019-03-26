@@ -29,6 +29,7 @@ import rs.ltt.android.entity.EntityStateEntity;
 import rs.ltt.android.entity.EntityType;
 import rs.ltt.android.entity.MailboxEntity;
 import rs.ltt.android.entity.MailboxOverviewItem;
+import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.jmap.common.entity.Mailbox;
 import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.mua.cache.Update;
@@ -52,10 +53,16 @@ public abstract class MailboxDao extends AbstractEntityDao<Mailbox> {
     public abstract LiveData<List<MailboxOverviewItem>> getMailboxes();
 
     @Query("select id,parentId,name,sortOrder,unreadThreads,totalThreads,role from mailbox where role=:role limit 1")
-    public abstract LiveData<MailboxOverviewItem> getMailboxOverviewItem(Role role);
+    public abstract LiveData<MailboxOverviewItem> getMailboxOverviewItemLiveData(Role role);
+
+    @Query("select id,parentId,name,sortOrder,unreadThreads,totalThreads,role from mailbox where role=:role limit 1")
+    public abstract MailboxOverviewItem getMailboxOverviewItem(Role role);
 
     @Query("select id,parentid,name,sortOrder,unreadThreads,totalThreads,role from mailbox where id=:id")
     public abstract LiveData<MailboxOverviewItem> getMailboxOverviewItem(String id);
+
+    @Query("select distinct mailbox.id,role,name from email join email_mailbox on email_mailbox.emailId=email.id join mailbox on email_mailbox.mailboxId=mailbox.id where threadId=:threadId")
+    public abstract LiveData<List<MailboxWithRoleAndName>> getMailboxesForThread(String threadId);
 
     @Query("update mailbox set totalEmails=:value where id=:id")
     public abstract void updateTotalEmails(String id, Integer value);

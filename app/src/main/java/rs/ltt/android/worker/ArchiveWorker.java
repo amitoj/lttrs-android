@@ -26,33 +26,27 @@ import androidx.annotation.NonNull;
 import androidx.work.Data;
 import androidx.work.WorkerParameters;
 import rs.ltt.android.entity.EmailWithMailboxes;
-import rs.ltt.jmap.client.api.MethodErrorResponseException;
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
-import rs.ltt.jmap.common.method.MethodErrorResponse;
-import rs.ltt.jmap.common.method.error.StateMismatchMethodErrorResponse;
 
-public class RemoveFromMailboxWorker extends MuaWorker {
+public class ArchiveWorker extends MuaWorker {
 
     private static final String THREAD_ID_KEY = "threadId";
-    private static final String MAILBOX_ID_KEY = "mailboxId";
 
     private final String threadId;
-    private final String mailboxId;
 
-    public RemoveFromMailboxWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public ArchiveWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         final Data data = getInputData();
         this.threadId = data.getString(THREAD_ID_KEY);
-        this.mailboxId = data.getString(MAILBOX_ID_KEY);
     }
 
     @NonNull
     @Override
     public Result doWork() {
         List<EmailWithMailboxes> emails = threadId == null ? Collections.emptyList() : database.emailDao().getEmailsWithMailboxes(threadId);
-        Log.d("lttrs", "RemoveFromMailboxWorker. threadId=" + threadId + " ("+emails.size()+") mailbox=" + mailboxId);
+        Log.d("lttrs", "ArchiveWorker threadId=" + threadId + " ("+emails.size()+")");
         try {
-            Boolean result = mua.removeFromMailbox(emails, this.mailboxId).get();
+            Boolean result = mua.archive(emails).get();
             Log.d("lttrs", "made changes to " + threadId + ": " + result);
             return Result.success();
         } catch (ExecutionException e) {
@@ -62,10 +56,9 @@ public class RemoveFromMailboxWorker extends MuaWorker {
         }
     }
 
-    public static Data data(String threadId, IdentifiableMailboxWithRole mailbox) {
+    public static Data data(String threadId) {
         return new Data.Builder()
                 .putString(THREAD_ID_KEY, threadId)
-                .putString(MAILBOX_ID_KEY, mailbox.getId())
                 .build();
     }
 }

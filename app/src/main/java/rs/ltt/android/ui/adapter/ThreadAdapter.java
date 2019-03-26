@@ -22,14 +22,11 @@ import android.view.ViewGroup;
 import java.util.Set;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.paging.AsyncPagedListDiffer;
 import androidx.paging.PagedList;
-import androidx.recyclerview.widget.AdapterListUpdateCallback;
 import androidx.recyclerview.widget.AsyncDifferConfig;
 import androidx.recyclerview.widget.DiffUtil;
-import androidx.recyclerview.widget.ListUpdateCallback;
 import androidx.recyclerview.widget.RecyclerView;
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.EmailHeaderBinding;
@@ -67,34 +64,12 @@ public class ThreadAdapter extends RecyclerView.Adapter<ThreadAdapter.AbstractTh
         this.expandedItems = expandedItems;
     }
 
-
     //we need this rather inconvenient setup instead of simply using PagedListAdapter to allow for
     //a header view. If we were to use the PagedListAdapter the item update callbacks wouldn’t work.
     //The problem and the solution is described in this github issue: https://github.com/googlesamples/android-architecture-components/issues/375
     //additional documentation on how to implement a AsyncPagedListDiffer can be found here:
     //https://developer.android.com/reference/android/arch/paging/AsyncPagedListDiffer
-    private final AdapterListUpdateCallback adapterCallback = new AdapterListUpdateCallback(this);
-    private final AsyncPagedListDiffer<FullEmail> mDiffer = new AsyncPagedListDiffer<>(new ListUpdateCallback() {
-        @Override
-        public void onInserted(int position, int count) {
-            adapterCallback.onInserted(position + 1, count);
-        }
-
-        @Override
-        public void onRemoved(int position, int count) {
-            adapterCallback.onRemoved(position + 1, count);
-        }
-
-        @Override
-        public void onMoved(int fromPosition, int toPosition) {
-            adapterCallback.onMoved(fromPosition + 1, toPosition + 1);
-        }
-
-        @Override
-        public void onChanged(int position, int count, @Nullable Object payload) {
-            adapterCallback.onChanged(position + 1, count, payload);
-        }
-    }, new AsyncDifferConfig.Builder<>(ITEM_CALLBACK).build());
+    private final AsyncPagedListDiffer<FullEmail> mDiffer = new AsyncPagedListDiffer<>(new OffsetListUpdateCallback<>(this,1), new AsyncDifferConfig.Builder<>(ITEM_CALLBACK).build());
 
     @NonNull
     @Override
@@ -125,15 +100,16 @@ public class ThreadAdapter extends RecyclerView.Adapter<ThreadAdapter.AbstractTh
             ThreadItemViewHolder itemViewHolder = (ThreadItemViewHolder) holder;
             FullEmail email = mDiffer.getItem(position - 1);
             final boolean lastEmail = mDiffer.getItemCount() == position;
+            final boolean expanded = email != null && expandedItems.contains(email.id);
+            itemViewHolder.binding.setExpanded(expanded);
             itemViewHolder.binding.setEmail(email);
             itemViewHolder.binding.divider.setVisibility(lastEmail ? View.GONE : View.VISIBLE);
-            final boolean expanded = email != null && expandedItems.contains(email.id);
             if (expanded) {
                 Touch.expandTouchArea(itemViewHolder.binding.header, itemViewHolder.binding.moreOptions, 8);
             } else {
                 itemViewHolder.binding.header.setTouchDelegate(null);
             }
-            itemViewHolder.binding.setExpanded(expanded);
+
             itemViewHolder.binding.header.setOnClickListener(v -> {
                 if (expandedItems.contains(email.id)) {
                     expandedItems.remove(email.id);

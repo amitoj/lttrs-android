@@ -17,10 +17,13 @@ package rs.ltt.android.repository;
 
 import android.app.Application;
 
+import java.util.List;
+
 import androidx.lifecycle.LiveData;
 import androidx.paging.LivePagedListBuilder;
 import androidx.paging.PagedList;
 import rs.ltt.android.entity.FullEmail;
+import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.entity.ThreadHeader;
 
 public class ThreadRepository extends LttrsRepository {
@@ -35,5 +38,9 @@ public class ThreadRepository extends LttrsRepository {
 
     public LiveData<ThreadHeader> getThreadHeader(String threadId) {
         return database.emailDao().getThreadHeader(threadId);
+    }
+
+    public LiveData<List<MailboxWithRoleAndName>> getMailboxes(String threadId) {
+        return database.mailboxDao().getMailboxesForThread(threadId);
     }
 }

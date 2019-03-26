@@ -36,7 +36,7 @@ import rs.ltt.jmap.common.entity.Role;
 
 public abstract class AbstractMailboxQueryFragment extends AbstractQueryFragment {
 
-    private MailboxQueryViewModel mailboxQueryViewModel;
+    protected MailboxQueryViewModel mailboxQueryViewModel;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -75,12 +75,6 @@ public abstract class AbstractMailboxQueryFragment extends AbstractQueryFragment
         } else {
             return QueryItemTouchHelper.Swipable.NO;
         }
-    }
-
-    @Override
-    protected void onQueryItemSwiped(ThreadOverviewItem item) {
-        mailboxQueryViewModel.archive(item);
-
     }
 
     public interface OnMailboxOpened {

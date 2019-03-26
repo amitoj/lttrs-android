@@ -26,7 +26,6 @@ import rs.ltt.android.database.LttrsDatabase;
 import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.jmap.common.entity.EmailQuery;
-import rs.ltt.jmap.common.entity.Mailbox;
 import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
 
@@ -41,7 +40,7 @@ public class MailboxQueryViewModel extends AbstractQueryViewModel {
         super(application);
         LttrsDatabase lttrsDatabase = LttrsDatabase.getInstance(application, Credentials.username);
         if (mailboxId == null) {
-            this.mailbox = lttrsDatabase.mailboxDao().getMailboxOverviewItem(Role.INBOX);
+            this.mailbox = lttrsDatabase.mailboxDao().getMailboxOverviewItemLiveData(Role.INBOX);
         } else {
             this.mailbox = lttrsDatabase.mailboxDao().getMailboxOverviewItem(mailboxId);
         }
@@ -55,7 +54,7 @@ public class MailboxQueryViewModel extends AbstractQueryViewModel {
         init();
     }
 
-    public void archive(ThreadOverviewItem item) {
+    public void removeFromMailbox(ThreadOverviewItem item) {
         final MailboxOverviewItem mailbox = this.mailbox.getValue();
         if (mailbox == null) {
             throw new IllegalStateException("No mailbox associated with MailboxQueryViewModel");
@@ -63,6 +62,11 @@ public class MailboxQueryViewModel extends AbstractQueryViewModel {
         Log.d("lttrs", "remove " + item.emailId + " from " + mailbox.name);
 
         queryRepository.removeFromMailbox(item.threadId, mailbox);
+    }
+
+    //TODO: should probably be moved to AbstractQueryViewModel
+    public void archive(ThreadOverviewItem item) {
+        queryRepository.archive(item.threadId);
     }
 
 

@@ -38,11 +38,13 @@ import rs.ltt.jmap.mua.cache.QueryUpdate;
 import rs.ltt.jmap.mua.entity.QueryResultItem;
 import rs.ltt.jmap.mua.util.QueryResult;
 
+import static androidx.room.OnConflictStrategy.REPLACE;
+
 @Dao
 public abstract class QueryDao extends AbstractEntityDao<Email> {
 
 
-    @Insert
+    @Insert(onConflict = REPLACE)
     abstract long insert(QueryEntity entity);
 
     @Insert
@@ -138,8 +140,6 @@ public abstract class QueryDao extends AbstractEntityDao<Email> {
         for (String emailId : queryUpdate.getRemoved()) {
             Log.d("lttrs", "deleting emailId=" + emailId + " from queryId=" + queryEntity.id);
             decrementAllPositionsFrom(queryEntity.id, emailId);
-
-            //TODO do this on every update
             deleteQueryItem(queryEntity.id, emailId);
         }
         for (AddedItem<QueryResultItem> addedItem : queryUpdate.getAdded()) {
