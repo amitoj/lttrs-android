@@ -16,49 +16,24 @@
 package rs.ltt.android.worker;
 
 import android.content.Context;
-import android.util.Log;
 
-import java.util.Collections;
+import com.google.common.util.concurrent.ListenableFuture;
+
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import androidx.annotation.NonNull;
-import androidx.work.Data;
 import androidx.work.WorkerParameters;
 import rs.ltt.android.entity.EmailWithMailboxes;
-import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
 
-public class ArchiveWorker extends MuaWorker {
+public class ArchiveWorker extends AbstractMailboxModificationWorker {
 
-    private static final String THREAD_ID_KEY = "threadId";
-
-    private final String threadId;
 
     public ArchiveWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
-        final Data data = getInputData();
-        this.threadId = data.getString(THREAD_ID_KEY);
     }
 
-    @NonNull
     @Override
-    public Result doWork() {
-        List<EmailWithMailboxes> emails = threadId == null ? Collections.emptyList() : database.emailDao().getEmailsWithMailboxes(threadId);
-        Log.d("lttrs", "ArchiveWorker threadId=" + threadId + " ("+emails.size()+")");
-        try {
-            Boolean result = mua.archive(emails).get();
-            Log.d("lttrs", "made changes to " + threadId + ": " + result);
-            return Result.success();
-        } catch (ExecutionException e) {
-            return toResult(e);
-        } catch (InterruptedException e) {
-            return Result.failure();
-        }
-    }
-
-    public static Data data(String threadId) {
-        return new Data.Builder()
-                .putString(THREAD_ID_KEY, threadId)
-                .build();
+    protected ListenableFuture<Boolean> modify(List<EmailWithMailboxes> emails) {
+        return mua.archive(emails);
     }
 }

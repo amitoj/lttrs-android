@@ -22,7 +22,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import androidx.work.Constraints;
-import androidx.work.Data;
 import androidx.work.ExistingWorkPolicy;
 import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
@@ -36,6 +35,7 @@ import rs.ltt.android.entity.MailboxOverwriteEntity;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.entity.QueryEntity;
 import rs.ltt.android.entity.QueryItemOverwriteEntity;
+import rs.ltt.android.worker.AbstractMailboxModificationWorker;
 import rs.ltt.android.worker.ArchiveWorker;
 import rs.ltt.android.worker.ModifyKeywordWorker;
 import rs.ltt.android.worker.MoveToInboxWorker;
@@ -119,7 +119,7 @@ public abstract class LttrsRepository {
                     .setInputData(RemoveFromMailboxWorker.data(threadId, mailbox))
                     .build();
             WorkManager workManager = WorkManager.getInstance();
-            workManager.enqueueUniqueWork(MuaWorker.SYNC_MAILBOXES, ExistingWorkPolicy.APPEND, workRequest);
+            workManager.enqueueUniqueWork(MuaWorker.SYNC_LABELS, ExistingWorkPolicy.APPEND, workRequest);
         });
     }
 
@@ -134,7 +134,7 @@ public abstract class LttrsRepository {
                     .setInputData(ArchiveWorker.data(threadId))
                     .build();
             WorkManager workManager = WorkManager.getInstance();
-            workManager.enqueueUniqueWork(MuaWorker.SYNC_MAILBOXES, ExistingWorkPolicy.APPEND, workRequest);
+            workManager.enqueueUniqueWork(ArchiveWorker.uniqueName(threadId), ExistingWorkPolicy.REPLACE, workRequest);
         });
     }
 
@@ -150,10 +150,10 @@ public abstract class LttrsRepository {
 
             OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(MoveToInboxWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
-                    .setInputData(MoveToInboxWorker.data(threadId))
+                    .setInputData(AbstractMailboxModificationWorker.data(threadId))
                     .build();
             WorkManager workManager = WorkManager.getInstance();
-            workManager.enqueueUniqueWork(MuaWorker.SYNC_MAILBOXES, ExistingWorkPolicy.APPEND, workRequest);
+            workManager.enqueueUniqueWork(MoveToInboxWorker.uniqueName(threadId), ExistingWorkPolicy.REPLACE, workRequest);
         });
     }
 
@@ -171,7 +171,7 @@ public abstract class LttrsRepository {
                     .setInputData(MoveToTrashWorker.data(threadId))
                     .build();
             WorkManager workManager = WorkManager.getInstance();
-            workManager.enqueueUniqueWork(MuaWorker.SYNC_MAILBOXES, ExistingWorkPolicy.APPEND, workRequest);
+            workManager.enqueueUniqueWork(MoveToTrashWorker.uniqueName(threadId), ExistingWorkPolicy.REPLACE, workRequest);
         });
     }
 

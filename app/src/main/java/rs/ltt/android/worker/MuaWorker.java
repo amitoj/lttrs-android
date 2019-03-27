@@ -35,7 +35,7 @@ import rs.ltt.jmap.mua.Mua;
 public abstract class MuaWorker extends Worker {
 
     public static final String SYNC = "sync";
-    public static final String SYNC_MAILBOXES = "sync_mailboxes";
+    public static final String SYNC_LABELS = "sync_labels";
 
     protected final LttrsDatabase database;
     protected final Mua mua;
