@@ -45,7 +45,7 @@ public class ThreadViewModel extends AndroidViewModel {
 
     private LiveData<ThreadHeader> header;
 
-    LiveData<List<MailboxWithRoleAndName>> mailboxes;
+    private LiveData<List<MailboxWithRoleAndName>> mailboxes;
 
     private LiveData<MenuConfiguration> menuConfiguration;
 
@@ -54,7 +54,6 @@ public class ThreadViewModel extends AndroidViewModel {
 
     ThreadViewModel(@NonNull Application application, String threadId, String label) {
         super(application);
-        Log.d("lttrs", "created thread view model with label: " + label);
         this.threadId = threadId;
         this.label = label;
         this.threadRepository = new ThreadRepository(application);
@@ -62,9 +61,9 @@ public class ThreadViewModel extends AndroidViewModel {
         this.emails = this.threadRepository.getEmails(threadId);
         this.mailboxes = this.threadRepository.getMailboxes(threadId);
         this.menuConfiguration = Transformations.map(this.mailboxes, list -> {
-            final boolean archive = MailboxWithRoleAndName.isAnyOfRole(list, Role.INBOX);
-            final boolean removeLabel = !archive && MailboxWithRoleAndName.isAnyOfLabel(list, this.label);
-            final boolean moveToInbox = MailboxWithRoleAndName.isNoneOfRole(list, Role.INBOX);
+            final boolean removeLabel = MailboxWithRoleAndName.isAnyOfLabel(list, this.label);
+            final boolean archive = !removeLabel && MailboxWithRoleAndName.isAnyOfRole(list, Role.INBOX);
+            final boolean moveToInbox = MailboxWithRoleAndName.isAnyOfRole(list, Role.ARCHIVE) || MailboxWithRoleAndName.isAnyOfRole(list , Role.TRASH);
             final boolean moveToTrash = MailboxWithRoleAndName.isAnyNotOfRole(list, Role.TRASH);
             return new MenuConfiguration(archive, removeLabel, moveToInbox, moveToTrash);
         });
