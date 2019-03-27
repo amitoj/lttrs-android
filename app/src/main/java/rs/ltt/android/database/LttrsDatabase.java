@@ -39,6 +39,7 @@ import rs.ltt.android.entity.EmailMailboxEntity;
 import rs.ltt.android.entity.EntityStateEntity;
 import rs.ltt.android.entity.KeywordOverwriteEntity;
 import rs.ltt.android.entity.MailboxEntity;
+import rs.ltt.android.entity.MailboxOverwriteEntity;
 import rs.ltt.android.entity.QueryEntity;
 import rs.ltt.android.entity.QueryItemEntity;
 import rs.ltt.android.entity.QueryItemOverwriteEntity;
@@ -58,6 +59,7 @@ import rs.ltt.android.entity.ThreadItemEntity;
         QueryEntity.class,
         QueryItemEntity.class,
         KeywordOverwriteEntity.class,
+        MailboxOverwriteEntity.class,
         QueryItemOverwriteEntity.class
 }, version = 1)
 @TypeConverters(Converters.class)

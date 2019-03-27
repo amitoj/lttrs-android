@@ -28,9 +28,11 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
 import androidx.paging.PagedList;
 import rs.ltt.android.entity.FullEmail;
+import rs.ltt.android.entity.MailboxOverwriteEntity;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.entity.ThreadHeader;
 import rs.ltt.android.repository.ThreadRepository;
+import rs.ltt.android.util.CombinedListsLiveData;
 import rs.ltt.jmap.common.entity.Role;
 
 public class ThreadViewModel extends AndroidViewModel {
@@ -60,11 +62,25 @@ public class ThreadViewModel extends AndroidViewModel {
         this.header = this.threadRepository.getThreadHeader(threadId);
         this.emails = this.threadRepository.getEmails(threadId);
         this.mailboxes = this.threadRepository.getMailboxes(threadId);
-        this.menuConfiguration = Transformations.map(this.mailboxes, list -> {
+
+        LiveData<List<MailboxOverwriteEntity>> overwriteEntityLiveData = this.threadRepository.getMailboxOverwrites(threadId);
+
+        CombinedListsLiveData<MailboxOverwriteEntity, MailboxWithRoleAndName> combined = new CombinedListsLiveData<>(overwriteEntityLiveData, mailboxes);
+
+        this.menuConfiguration = Transformations.map(combined, pair -> {
+            List<MailboxOverwriteEntity> overwrites = pair.first;
+            List<MailboxWithRoleAndName> list = pair.second;
+
+            Log.d("lttrs", "num overwrites = " + overwrites.size());
+
+            boolean wasPutInArchiveOverwrite = MailboxOverwriteEntity.hasOverwrite(overwrites, Role.ARCHIVE);
+            boolean wasPutInTrashOverwrite = MailboxOverwriteEntity.hasOverwrite(overwrites, Role.TRASH);
+            boolean wasPutInInboxOverwrite = MailboxOverwriteEntity.hasOverwrite(overwrites, Role.INBOX);
+
             final boolean removeLabel = MailboxWithRoleAndName.isAnyOfLabel(list, this.label);
-            final boolean archive = !removeLabel && MailboxWithRoleAndName.isAnyOfRole(list, Role.INBOX);
-            final boolean moveToInbox = MailboxWithRoleAndName.isAnyOfRole(list, Role.ARCHIVE) || MailboxWithRoleAndName.isAnyOfRole(list , Role.TRASH);
-            final boolean moveToTrash = MailboxWithRoleAndName.isAnyNotOfRole(list, Role.TRASH);
+            final boolean archive = !removeLabel && (MailboxWithRoleAndName.isAnyOfRole(list, Role.INBOX) || wasPutInInboxOverwrite) && !wasPutInArchiveOverwrite && !wasPutInTrashOverwrite;
+            final boolean moveToInbox = (MailboxWithRoleAndName.isAnyOfRole(list, Role.ARCHIVE) || MailboxWithRoleAndName.isAnyOfRole(list, Role.TRASH) || wasPutInArchiveOverwrite || wasPutInTrashOverwrite) && !wasPutInInboxOverwrite;
+            final boolean moveToTrash = (MailboxWithRoleAndName.isAnyNotOfRole(list, Role.TRASH) || wasPutInInboxOverwrite) && !wasPutInTrashOverwrite;
             return new MenuConfiguration(archive, removeLabel, moveToInbox, moveToTrash);
         });
     }

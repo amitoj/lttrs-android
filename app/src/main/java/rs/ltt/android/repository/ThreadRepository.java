@@ -23,6 +23,7 @@ import androidx.lifecycle.LiveData;
 import androidx.paging.LivePagedListBuilder;
 import androidx.paging.PagedList;
 import rs.ltt.android.entity.FullEmail;
+import rs.ltt.android.entity.MailboxOverwriteEntity;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.entity.ThreadHeader;
 
@@ -42,5 +43,10 @@ public class ThreadRepository extends LttrsRepository {
 
     public LiveData<List<MailboxWithRoleAndName>> getMailboxes(String threadId) {
         return database.mailboxDao().getMailboxesForThreadLiveData(threadId);
+    }
+
+
+    public LiveData<List<MailboxOverwriteEntity>> getMailboxOverwrites(String threadId) {
+        return database.overwriteDao().getMailboxOverwrites(threadId);
     }
 }

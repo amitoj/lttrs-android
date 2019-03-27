@@ -15,10 +15,15 @@
 
 package rs.ltt.android.database.dao;
 
+import java.util.List;
+
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
+import androidx.room.Query;
 import rs.ltt.android.entity.KeywordOverwriteEntity;
+import rs.ltt.android.entity.MailboxOverwriteEntity;
 import rs.ltt.android.entity.QueryItemOverwriteEntity;
 
 import static androidx.room.OnConflictStrategy.REPLACE;
@@ -30,8 +35,14 @@ public abstract class OverwriteDao {
     public abstract void insert(KeywordOverwriteEntity keywordToggle);
 
     @Insert(onConflict = REPLACE)
+    public abstract void insert(MailboxOverwriteEntity entity);
+
+    @Insert(onConflict = REPLACE)
     public abstract void insert(QueryItemOverwriteEntity queryItemOverwriteEntity);
 
     @Delete
     public abstract void delete(QueryItemOverwriteEntity queryItemOverwriteEntity);
+
+    @Query("select * from mailbox_overwrite where threadId=:threadId")
+    public abstract LiveData<List<MailboxOverwriteEntity>> getMailboxOverwrites(String threadId);
 }

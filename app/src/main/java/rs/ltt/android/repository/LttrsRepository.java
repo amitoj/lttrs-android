@@ -32,6 +32,7 @@ import rs.ltt.android.cache.DatabaseCache;
 import rs.ltt.android.database.LttrsDatabase;
 import rs.ltt.android.entity.KeywordOverwriteEntity;
 import rs.ltt.android.entity.MailboxOverviewItem;
+import rs.ltt.android.entity.MailboxOverwriteEntity;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.entity.QueryEntity;
 import rs.ltt.android.entity.QueryItemOverwriteEntity;
@@ -126,6 +127,8 @@ public abstract class LttrsRepository {
         ioExecutor.execute(() -> {
             insertQueryItemOverwrite(threadId, Role.INBOX);
             deleteQueryItemOverwrite(threadId, Role.ARCHIVE);
+            database.overwriteDao().insert(MailboxOverwriteEntity.of(threadId, Role.INBOX, false));
+            database.overwriteDao().insert(MailboxOverwriteEntity.of(threadId, Role.ARCHIVE, true));
             OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(ArchiveWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(ArchiveWorker.data(threadId))
@@ -140,6 +143,11 @@ public abstract class LttrsRepository {
             insertQueryItemOverwrite(threadId, Role.ARCHIVE);
             insertQueryItemOverwrite(threadId, Role.TRASH);
             deleteQueryItemOverwrite(threadId, Role.INBOX);
+
+            database.overwriteDao().insert(MailboxOverwriteEntity.of(threadId, Role.INBOX, true));
+            database.overwriteDao().insert(MailboxOverwriteEntity.of(threadId, Role.ARCHIVE, false));
+            database.overwriteDao().insert(MailboxOverwriteEntity.of(threadId, Role.TRASH, false));
+
             OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(MoveToInboxWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(MoveToInboxWorker.data(threadId))
@@ -151,11 +159,13 @@ public abstract class LttrsRepository {
 
     public void moveToTrash(final String threadId) {
         ioExecutor.execute(() -> {
-            for(MailboxWithRoleAndName mailbox : database.mailboxDao().getMailboxesForThread(threadId)) {
+            for (MailboxWithRoleAndName mailbox : database.mailboxDao().getMailboxesForThread(threadId)) {
                 if (mailbox.role != Role.TRASH) {
                     insertQueryItemOverwrite(threadId, mailbox);
                 }
             }
+            database.overwriteDao().insert(MailboxOverwriteEntity.of(threadId, Role.INBOX, false));
+            database.overwriteDao().insert(MailboxOverwriteEntity.of(threadId, Role.TRASH, true));
             OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(MoveToTrashWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(MoveToTrashWorker.data(threadId))
