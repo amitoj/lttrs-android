@@ -191,4 +191,12 @@ public abstract class LttrsRepository {
             workManager.enqueueUniqueWork(ModifyKeywordWorker.uniqueName(threadId, keyword), ExistingWorkPolicy.REPLACE, workRequest);
         });
     }
+
+    public void markRead(String threadId) {
+        toggleKeyword(threadId, Keyword.SEEN, true);
+    }
+
+    public void markUnRead(String threadId) {
+        toggleKeyword(threadId, Keyword.SEEN, false);
+    }
 }

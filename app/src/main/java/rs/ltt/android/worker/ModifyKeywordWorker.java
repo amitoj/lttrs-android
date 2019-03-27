@@ -62,6 +62,9 @@ public class ModifyKeywordWorker extends MuaWorker {
                 madeChanges = mua.removeKeyword(emails, keyword).get();
             }
             Log.d("lttrs","made changes to "+threadId+": "+madeChanges);
+            if (!madeChanges) {
+                database.overwriteDao().deleteKeywordOverwritesByThread(threadId);
+            }
             return Result.success();
         } catch (ExecutionException e) {
             return toResult(e);

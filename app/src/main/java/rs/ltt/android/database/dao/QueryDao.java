@@ -62,6 +62,9 @@ public abstract class QueryDao extends AbstractEntityDao<Email> {
     @Query("select max(position) from query_item where queryId=:queryId")
     abstract int getMaxPosition(Long queryId);
 
+    @Query("select count(id) from query_item where queryId=:queryId")
+    abstract int getItemCount(Long queryId);
+
     //we inner join on threads here to make sure that we only return items that we actually have
     //due to the delay of fetchMissing we might have query_items that we do not have a corresponding thread for
     @Transaction
@@ -146,7 +149,7 @@ public abstract class QueryDao extends AbstractEntityDao<Email> {
             Log.d("lttrs", "adding item " + addedItem);
             Log.d("lttrs", "increment all positions where queryId=" + queryEntity.id + " and position=" + addedItem.getIndex());
 
-            if (incrementAllPositionsFrom(queryEntity.id, addedItem.getIndex()) == 0) {
+            if (incrementAllPositionsFrom(queryEntity.id, addedItem.getIndex()) == 0 && getItemCount(queryEntity.id) != addedItem.getIndex()) {
                 Log.d("lttrs", "ignoring query item change at position = " + addedItem.getIndex());
                 continue;
             }

@@ -59,6 +59,7 @@ public class ThreadViewModel extends AndroidViewModel {
         this.threadId = threadId;
         this.label = label;
         this.threadRepository = new ThreadRepository(application);
+        this.threadRepository.markRead(threadId);
         this.header = this.threadRepository.getThreadHeader(threadId);
         this.emails = this.threadRepository.getEmails(threadId);
         this.mailboxes = this.threadRepository.getMailboxes(threadId);
@@ -71,7 +72,7 @@ public class ThreadViewModel extends AndroidViewModel {
             List<MailboxOverwriteEntity> overwrites = pair.first;
             List<MailboxWithRoleAndName> list = pair.second;
 
-            Log.d("lttrs", "num overwrites = " + overwrites.size());
+            Log.d("lttrs", "num mailbox overwrites = " + overwrites.size());
 
             boolean wasPutInArchiveOverwrite = MailboxOverwriteEntity.hasOverwrite(overwrites, Role.ARCHIVE);
             boolean wasPutInTrashOverwrite = MailboxOverwriteEntity.hasOverwrite(overwrites, Role.TRASH);
@@ -99,6 +100,10 @@ public class ThreadViewModel extends AndroidViewModel {
 
     public void toggleFlagged(String threadId, boolean target) {
         threadRepository.toggleFlagged(threadId, target);
+    }
+
+    public void markUnread() {
+        threadRepository.markUnRead(threadId);
     }
 
     public String getLabel() {

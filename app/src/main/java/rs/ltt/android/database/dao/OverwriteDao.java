@@ -46,6 +46,9 @@ public abstract class OverwriteDao {
     @Query("delete from mailbox_overwrite where threadId=:threadId")
     public abstract void deleteMailboxOverwritesByThread(String threadId);
 
+    @Query("delete from keyword_overwrite where threadId=:threadId")
+    public abstract void deleteKeywordOverwritesByThread(String threadId);
+
     @Query("select * from mailbox_overwrite where threadId=:threadId")
     public abstract LiveData<List<MailboxOverwriteEntity>> getMailboxOverwrites(String threadId);
 }

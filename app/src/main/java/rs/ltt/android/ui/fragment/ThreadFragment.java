@@ -29,6 +29,8 @@ import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 import rs.ltt.android.R;
@@ -99,18 +101,28 @@ public class ThreadFragment extends Fragment implements OnFlaggedToggled {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem menuItem) {
+
+        final NavController navController = Navigation.findNavController(getActivity(), R.id.nav_host_fragment);
+
         switch (menuItem.getItemId()) {
+            case R.id.action_mark_unread:
+                threadViewModel.markUnread();
+                navController.popBackStack();
+                return true;
             case R.id.action_archive:
                 threadViewModel.archive();
+                navController.popBackStack();
                 return true;
             case R.id.action_remove_label:
                 threadViewModel.removeLabel();
+                navController.popBackStack();
                 return true;
             case R.id.action_move_to_inbox:
                 threadViewModel.moveToInbox();
                 return true;
             case R.id.action_move_to_trash:
                 threadViewModel.moveToTrash();
+                navController.popBackStack();
                 return true;
             default:
                 return super.onOptionsItemSelected(menuItem);

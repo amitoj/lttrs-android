@@ -90,7 +90,8 @@ public class ThreadOverviewItem {
     }
 
     public boolean everyHasSeenKeyword() {
-        return Keywords.everyHas(getOrderedEmails(), Keyword.SEEN);
+        KeywordOverwriteEntity seenOverwrite = KeywordOverwriteEntity.getKeywordOverwrite(keywordOverwriteEntities, Keyword.SEEN);
+        return seenOverwrite != null ? seenOverwrite.value : Keywords.everyHas(getOrderedEmails(), Keyword.SEEN);
     }
 
     public boolean showAsFlagged() {
@@ -123,10 +124,11 @@ public class ThreadOverviewItem {
     }
 
     private Map<String, From> calculateFromMap() {
+        KeywordOverwriteEntity seenOverwrite = KeywordOverwriteEntity.getKeywordOverwrite(keywordOverwriteEntities, Keyword.SEEN);
         LinkedHashMap<String, From> fromMap = new LinkedHashMap<>();
         final List<Email> emails = getOrderedEmails();
         for (Email email : emails) {
-            final boolean seen = email.keywords.contains(Keyword.SEEN);
+            final boolean seen = seenOverwrite != null ? seenOverwrite.value : email.keywords.contains(Keyword.SEEN);
             for (EmailAddress emailAddress : email.emailAddresses) {
                 if (emailAddress.type == EmailAddressType.FROM) {
                     From from = fromMap.get(emailAddress.getEmail());
