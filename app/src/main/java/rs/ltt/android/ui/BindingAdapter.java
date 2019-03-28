@@ -21,6 +21,8 @@ import android.text.SpannableStringBuilder;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.common.base.CharMatcher;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -36,9 +38,7 @@ public class BindingAdapter {
 
         Block currentBlock = null;
 
-        for (int i = 0; i < lines.length; ++i) {
-            String currentLine = lines[i];
-
+        for (String currentLine : lines) {
             QuoteIndicator quoteIndicator = QuoteIndicator.quoteDepth(currentLine);
             if (currentBlock == null) {
                 currentBlock = new Block(quoteIndicator.depth);
@@ -78,7 +78,7 @@ public class BindingAdapter {
         private final int depth;
         private final ArrayList<String> lines = new ArrayList<>();
 
-        public Block(int depth) {
+        Block(int depth) {
             this.depth = depth;
         }
 
@@ -89,43 +89,53 @@ public class BindingAdapter {
         private int maxLineLength() {
             int max = 0;
             for (String line : lines) {
-                max = Math.max(line.length(), max);
+                if (CharMatcher.is(' ').countIn(line) > 1) {
+                    max = Math.max(line.length(), max);
+                }
             }
             return max;
         }
 
+        @Override
         public String toString() {
-            int max = Math.min(70, maxLineLength());
+            int max = maxLineLength();
 
             int lastLineLength = max;
 
             boolean breakNextLine = false;
+            boolean breakNextBlock = false;
+            boolean skipNextBreak = false;
 
             StringBuilder stringBuilder = new StringBuilder();
             for (String line : this.lines) {
                 String[] words = line.split("\\s+");
                 String firstWord = words.length == 0 ? "" : words[0];
                 if (stringBuilder.length() != 0) {
-                    if (breakNextLine) {
+
+                    boolean listItem = (firstWord.length() <= 3 && (firstWord.endsWith(")") || firstWord.endsWith(":"))) || line.startsWith("* ") || line.startsWith("- ") || (firstWord.matches("\\[[0-9]+]:"));
+                    if (skipNextBreak) {
+                        //do nothing
+                    } else if (breakNextLine || breakNextBlock) {
                         stringBuilder.append('\n');
-                        lastLineLength = line.length();
-                    } else if (depth > 0 && words.length == 1) {
-                        stringBuilder.append(' ');
-                        lastLineLength += line.length();
-                    } else if (firstWord.endsWith(")") || firstWord.endsWith(":") || line.startsWith("* ") || line.startsWith("- ")) {
+                    } else if (line.isEmpty()) {
                         stringBuilder.append('\n');
-                        lastLineLength = line.length();
+                    } else if  (listItem || line.contains("__")) {
+                        stringBuilder.append('\n');
                     } else if (lastLineLength + firstWord.length() < max) {
                         stringBuilder.append('\n');
-                        lastLineLength = line.length();
                     } else {
                         stringBuilder.append(' ');
-                        lastLineLength = line.length();
                     }
+                    lastLineLength = line.length();
+                    skipNextBreak = false;
+                } else if (line.isEmpty() && depth == 0) {
+                    stringBuilder.append('\n');
+                    skipNextBreak = true;
                 }
 
-                breakNextLine = (breakNextLine && !line.isEmpty()) || line.endsWith(":") || line.contains("__");
-
+                breakNextLine = line.endsWith(":") || !line.contains(" ");
+                final boolean blockBoundary = line.matches("_{2,}");
+                breakNextBlock = (breakNextBlock && !line.isEmpty() && !blockBoundary) || (blockBoundary && !breakNextBlock);
                 stringBuilder.append(line);
             }
             return stringBuilder.toString();
@@ -138,12 +148,12 @@ public class BindingAdapter {
         private final int chars;
         private final int depth;
 
-        public QuoteIndicator(int chars, int depth) {
+        QuoteIndicator(int chars, int depth) {
             this.chars = chars;
             this.depth = depth;
         }
 
-        public static QuoteIndicator quoteDepth(String line) {
+        static QuoteIndicator quoteDepth(String line) {
             int quoteDepth = 0;
             int chars = 0;
             for (int i = 0; i < line.length(); ++i) {
