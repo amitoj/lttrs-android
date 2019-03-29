@@ -77,6 +77,8 @@ public abstract class AbstractQueryFragment extends Fragment implements OnFlagge
         binding.setViewModel(viewModel);
         binding.setLifecycleOwner(getViewLifecycleOwner());
 
+        binding.swipeToRefresh.setColorScheme(R.color.colorAccent);
+
 
         //TODO: do we want to get rid of flicer on changes
         //((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
