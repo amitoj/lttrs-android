@@ -25,6 +25,8 @@ import com.google.common.base.CharMatcher;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import rs.ltt.android.R;
@@ -75,6 +77,9 @@ public class BindingAdapter {
 
     private static class Block {
 
+        private static final float X = 0.1f;
+        private static final float N = 0.15f;
+
         private final int depth;
         private final ArrayList<String> lines = new ArrayList<>();
 
@@ -87,11 +92,24 @@ public class BindingAdapter {
         }
 
         private int maxLineLength() {
+            ArrayList<Integer> lineLengths = new ArrayList<>();
             int max = 0;
             for (String line : lines) {
                 if (CharMatcher.is(' ').countIn(line) > 1) {
                     max = Math.max(line.length(), max);
+                    lineLengths.add(line.length());
                 }
+            }
+            Collections.sort(lineLengths);
+            if (lineLengths.size() <= 1) {
+                return max;
+            }
+            //get the top x% of line length
+            List<Integer> topXPercent = lineLengths.subList((int) ((1.0 - X) * lineLengths.size()) - 1, lineLengths.size());
+            //are those top x% of lines less than n% apart from each other?
+            if (topXPercent.get(topXPercent.size() -1) - topXPercent.get(0) <= N * topXPercent.get(topXPercent.size() -1)) {
+                //return median of those top x%
+                return topXPercent.size() % 2 == 1 ? topXPercent.get(topXPercent.size() / 2) : ((topXPercent.get(topXPercent.size() / 2 -1) + topXPercent.get(topXPercent.size() / 2)) / 2);
             }
             return max;
         }
@@ -133,7 +151,7 @@ public class BindingAdapter {
                     skipNextBreak = true;
                 }
 
-                breakNextLine = line.endsWith(":") || !line.contains(" ");
+                breakNextLine = line.endsWith(":") || !line.contains(" "); //TODO maybe not break on every :
                 final boolean blockBoundary = line.matches("_{2,}");
                 breakNextBlock = (breakNextBlock && !line.isEmpty() && !blockBoundary) || (blockBoundary && !breakNextBlock);
                 stringBuilder.append(line);
