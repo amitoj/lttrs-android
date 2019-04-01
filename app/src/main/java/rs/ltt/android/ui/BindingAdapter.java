@@ -18,6 +18,7 @@ package rs.ltt.android.ui;
 import android.content.Context;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -79,6 +80,7 @@ public class BindingAdapter {
 
         private static final float X = 0.1f;
         private static final float N = 0.15f;
+        private static final float VOLATILITY_THRESHOLD = 12.0f;
 
         private final int depth;
         private final ArrayList<String> lines = new ArrayList<>();
@@ -106,6 +108,20 @@ public class BindingAdapter {
             }
             //get the top x% of line length
             List<Integer> topXPercent = lineLengths.subList((int) ((1.0 - X) * lineLengths.size()) - 1, lineLengths.size());
+
+            double sum = 0.0;
+            int top = lineLengths.get(lineLengths.size() - 1);
+            for(int i = 0; i < lineLengths.size() - 1; ++i) {
+                int bottom = lineLengths.get(i);
+                sum += ((float) top / (float) bottom) - 1.0f;
+            }
+            double avg = sum / topXPercent.size();
+
+            if (avg >= VOLATILITY_THRESHOLD) {
+                Log.d("lttrs","toggled volatility threshold with "+avg);
+                return Integer.MAX_VALUE;
+            }
+
             //are those top x% of lines less than n% apart from each other?
             if (topXPercent.get(topXPercent.size() -1) - topXPercent.get(0) <= N * topXPercent.get(topXPercent.size() -1)) {
                 //return median of those top x%
