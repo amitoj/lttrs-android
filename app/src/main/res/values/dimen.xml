@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright 2019 Daniel Gultsch
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,15 +15,5 @@
   -->
 
 <resources>
-    <string name="app_name">Ltt.rs</string>
-
-    <string name="archive">Archive</string>
-    <string name="mark_unread">Mark unread</string>
-    <string name="delete">Delete</string>
-    <string name="mark_important">Mark important</string>
-    <string name="search">Search</string>
-    <string name="to_x">to %s</string>
-    <string name="move_to_inbox">Move to inbox</string>
-    <string name="remove_label_x">Remove label %s</string>
-    <string name="search_hint">Search email</string>
+    <dimen name="toolbar_icon_width">48dp</dimen>
 </resources>

@@ -24,62 +24,58 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModelProviders;
-import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.android.ui.QueryItemTouchHelper;
 import rs.ltt.android.ui.model.AbstractQueryViewModel;
-import rs.ltt.android.ui.model.MailboxQueryViewModel;
-import rs.ltt.android.ui.model.MailboxQueryViewModelFactory;
-import rs.ltt.jmap.common.entity.Role;
+import rs.ltt.android.ui.model.SearchQueryViewModel;
+import rs.ltt.android.ui.model.SearchQueryViewModelFactory;
 
 
-public abstract class AbstractMailboxQueryFragment extends AbstractQueryFragment {
+public class SearchQueryFragment extends AbstractQueryFragment {
 
-    protected MailboxQueryViewModel mailboxQueryViewModel;
+    private SearchQueryViewModel searchQueryViewModel;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        this.mailboxQueryViewModel = ViewModelProviders.of(this, new MailboxQueryViewModelFactory(getActivity().getApplication(), getMailboxId())).get(MailboxQueryViewModel.class);
+
+        final Bundle bundle = getArguments();
+        final String term = SearchQueryFragmentArgs.fromBundle(bundle == null ? new Bundle() : bundle).getText();
+        this.searchQueryViewModel = ViewModelProviders.of(this, new SearchQueryViewModelFactory(getActivity().getApplication(), term)).get(SearchQueryViewModel.class);
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
     @Override
     protected AbstractQueryViewModel getQueryViewModel() {
-        return this.mailboxQueryViewModel;
+        return this.searchQueryViewModel;
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mailboxQueryViewModel.getMailbox().observe(this, mailboxOverviewItem -> {
-            if (mailboxOverviewItem == null) {
+        binding.fab.setVisibility(View.GONE);
+        searchQueryViewModel.getSearchTerm().observe(this, searchTerm -> {
+            if (searchTerm == null) {
                 return;
             }
             final Activity activity = getActivity();
-            if (activity instanceof OnMailboxOpened) {
-                ((OnMailboxOpened) activity).onMailboxOpened(mailboxOverviewItem);
+            if (activity instanceof OnTermSearched) {
+                ((OnTermSearched) activity).onTermSearched(searchTerm);
             }
         });
     }
 
     @Override
     protected QueryItemTouchHelper.Swipable onQueryItemSwipe(ThreadOverviewItem item) {
-        final MailboxOverviewItem mailbox = mailboxQueryViewModel != null ? mailboxQueryViewModel.getMailbox().getValue() : null;
-        if (mailbox == null) {
-            return QueryItemTouchHelper.Swipable.NO;
-        } else if (mailbox.role == Role.INBOX) {
-            return QueryItemTouchHelper.Swipable.ARCHIVE;
-        } else if (mailbox.role == null) {
-            return QueryItemTouchHelper.Swipable.REMOVE_LABEL;
-        } else {
-            return QueryItemTouchHelper.Swipable.NO;
-        }
+        return QueryItemTouchHelper.Swipable.NO;
     }
 
-    public interface OnMailboxOpened {
-        void onMailboxOpened(MailboxOverviewItem mailboxOverviewItem);
+    @Override
+    protected void onQueryItemSwiped(ThreadOverviewItem item) {
+
     }
 
-    protected abstract String getMailboxId();
+    public interface OnTermSearched {
+        void onTermSearched(String term);
+    }
 
 }

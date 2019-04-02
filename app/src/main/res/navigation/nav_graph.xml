@@ -23,6 +23,12 @@
         android:id="@+id/action_to_thread"
         app:destination="@+id/thread" />
 
+    <action
+        android:id="@+id/action_search"
+        app:destination="@+id/search"
+        app:popUpTo="@+id/search"
+        app:popUpToInclusive="true"/>
+
     <fragment
         android:id="@+id/inbox"
         android:name="rs.ltt.android.ui.fragment.MainMailboxQueryFragment"
@@ -67,6 +73,16 @@
             android:name="label"
             app:argType="string"
             app:nullable="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/search"
+        android:name="rs.ltt.android.ui.fragment.SearchQueryFragment"
+        android:label="search">
+        <argument
+            android:name="text"
+            app:argType="string"
+            app:nullable="false" />
     </fragment>
 
 </navigation>

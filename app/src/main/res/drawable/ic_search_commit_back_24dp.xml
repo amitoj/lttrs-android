@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright 2019 Daniel Gultsch
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,16 +14,13 @@
   ~ limitations under the License.
   -->
 
-<resources>
-    <string name="app_name">Ltt.rs</string>
-
-    <string name="archive">Archive</string>
-    <string name="mark_unread">Mark unread</string>
-    <string name="delete">Delete</string>
-    <string name="mark_important">Mark important</string>
-    <string name="search">Search</string>
-    <string name="to_x">to %s</string>
-    <string name="move_to_inbox">Move to inbox</string>
-    <string name="remove_label_x">Remove label %s</string>
-    <string name="search_hint">Search email</string>
-</resources>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:autoMirrored="true"
+    android:viewportHeight="24.0"
+    android:viewportWidth="24.0">
+    <path
+        android:fillColor="#8a000000"
+        android:pathData="m18.364,16.95l-8.605,-8.605l7.905,-0l-0.007,-2.001l-11.314,0l0,11.314l1.994,-0l0.007,-7.898l8.605,8.605l1.414,-1.414z" />
+</vector>

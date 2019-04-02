@@ -15,45 +15,64 @@
 
 package rs.ltt.android.ui;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
+import android.app.SearchManager;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewAnimationUtils;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.TranslateAnimation;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProviders;
-import androidx.navigation.NavArgument;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
+import rs.ltt.android.MainNavDirections;
 import rs.ltt.android.R;
-import rs.ltt.android.ui.adapter.MailboxListAdapter;
 import rs.ltt.android.databinding.ActivityMainBinding;
 import rs.ltt.android.entity.MailboxOverviewItem;
+import rs.ltt.android.ui.adapter.MailboxListAdapter;
 import rs.ltt.android.ui.fragment.AbstractMailboxQueryFragment;
 import rs.ltt.android.ui.fragment.MailboxQueryFragmentDirections;
 import rs.ltt.android.ui.fragment.MainMailboxQueryFragmentDirections;
+import rs.ltt.android.ui.fragment.SearchQueryFragment;
 import rs.ltt.android.ui.model.MailboxListViewModel;
 import rs.ltt.jmap.common.entity.Role;
 
-public class MainActivity extends AppCompatActivity implements AbstractMailboxQueryFragment.OnMailboxOpened, NavController.OnDestinationChangedListener {
+public class MainActivity extends AppCompatActivity implements AbstractMailboxQueryFragment.OnMailboxOpened, SearchQueryFragment.OnTermSearched, NavController.OnDestinationChangedListener, MenuItem.OnActionExpandListener {
+
+    private static final int NUM_TOOLBAR_ICON = 1;
 
     final MailboxListAdapter mailboxListAdapter = new MailboxListAdapter();
     private ActivityMainBinding binding = null;
+    private SearchView mSearchView;
 
-    private static final List<Integer> DESTINATIONS_SHOWING_DRAWER_BUTTON = Arrays.asList(
+    private static final List<Integer> MAIN_DESTINATIONS = Arrays.asList(
             R.id.inbox,
             R.id.mailbox
     );
+
+    private String currentSearchTerm = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +110,42 @@ public class MainActivity extends AppCompatActivity implements AbstractMailboxQu
     }
 
     @Override
+    public boolean onCreateOptionsMenu(@NonNull Menu menu) {
+        final int currentDestination = getCurrentDestinationId();
+        final boolean showSearch = MAIN_DESTINATIONS.contains(currentDestination) || currentDestination == R.id.search;
+
+        getMenuInflater().inflate(R.menu.activity_main, menu);
+
+        MenuItem mSearchItem = menu.findItem(R.id.action_search);
+
+        mSearchItem.setVisible(showSearch);
+
+        if (showSearch) {
+            SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+            mSearchView = (SearchView) mSearchItem.getActionView();
+            mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+            if (currentDestination == R.id.search) {
+                setSearchToolbarColors();
+                mSearchItem.expandActionView();
+                mSearchView.setQuery(currentSearchTerm, false);
+                mSearchView.clearFocus();
+            }
+            mSearchItem.setOnActionExpandListener(this);
+        } else {
+            mSearchView = null;
+            resetToolbarColors();
+        }
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    private int getCurrentDestinationId() {
+        final NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        final NavDestination currentDestination = navController.getCurrentDestination();
+        return currentDestination == null ? 0 : currentDestination.getId();
+    }
+
+    @Override
     public void onStart() {
         final NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         navController.addOnDestinationChangedListener(this);
@@ -110,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements AbstractMailboxQu
             return;
         }
         final int destinationId = destination.getId();
-        final boolean showMenu = DESTINATIONS_SHOWING_DRAWER_BUTTON.contains(destinationId);
+        final boolean showMenu = MAIN_DESTINATIONS.contains(destinationId);
         actionbar.setDisplayHomeAsUpEnabled(true);
         actionbar.setHomeAsUpIndicator(showMenu ? R.drawable.ic_menu_black_24dp : R.drawable.ic_arrow_back_white_24dp);
         actionbar.setDisplayShowTitleEnabled(destinationId != R.id.thread);
@@ -122,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements AbstractMailboxQu
             case android.R.id.home:
                 final NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
                 final NavDestination currentDestination = navController.getCurrentDestination();
-                if (currentDestination != null && DESTINATIONS_SHOWING_DRAWER_BUTTON.contains(currentDestination.getId())) {
+                if (currentDestination != null && MAIN_DESTINATIONS.contains(currentDestination.getId())) {
                     binding.drawerLayout.openDrawer(GravityCompat.START);
                     return true;
                 } else {
@@ -130,6 +185,19 @@ public class MainActivity extends AppCompatActivity implements AbstractMailboxQu
                 }
         }
         return super.onOptionsItemSelected(item);
+
+    }
+
+    public void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            if (mSearchView != null) {
+                mSearchView.clearFocus();
+            }
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            final NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+            navController.navigate(MainNavDirections.actionSearch(query));
+        }
 
     }
 
@@ -151,5 +219,112 @@ public class MainActivity extends AppCompatActivity implements AbstractMailboxQu
     @Override
     public void onDestinationChanged(@NonNull NavController controller, @NonNull NavDestination destination, @Nullable Bundle arguments) {
         configureActionBarForDestination(destination);
+    }
+
+    @Override
+    public boolean onMenuItemActionExpand(MenuItem item) {
+        animateShowSearchToolbar();
+        return true;
+    }
+
+    @Override
+    public boolean onMenuItemActionCollapse(MenuItem item) {
+        animateCloseSearchToolbar();
+        if (getCurrentDestinationId() == R.id.search) {
+            final NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+            navController.navigateUp();
+        }
+        return true;
+    }
+
+    public void animateShowSearchToolbar() {
+        setSearchToolbarColors();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            animateShowSearchToolbarLollipop();
+        } else {
+            animateShowSearchToolbarLegacy();
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void animateShowSearchToolbarLollipop() {
+        final int toolbarIconWidth = getResources().getDimensionPixelSize(R.dimen.toolbar_icon_width);
+        final int width = binding.toolbar.getWidth() - ((toolbarIconWidth * NUM_TOOLBAR_ICON) / 2);
+        Animator createCircularReveal = ViewAnimationUtils.createCircularReveal(binding.toolbar, Theme.isRtl(this) ? binding.toolbar.getWidth() - width : width, binding.toolbar.getHeight() / 2, 0.0f, (float) width);
+        createCircularReveal.setDuration(250);
+        createCircularReveal.start();
+    }
+
+    private void animateShowSearchToolbarLegacy() {
+        TranslateAnimation translateAnimation = new TranslateAnimation(0.0f, 0.0f, (float) (-binding.toolbar.getHeight()), 0.0f);
+        translateAnimation.setDuration(220);
+        binding.toolbar.clearAnimation();
+        binding.toolbar.startAnimation(translateAnimation);
+    }
+
+    public void animateCloseSearchToolbar() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            animateCloseSearchToolbarLollipop();
+        } else {
+            animateCloseSearchToolbarLegacy();
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void animateCloseSearchToolbarLollipop() {
+        final int toolbarIconWidth = getResources().getDimensionPixelSize(R.dimen.toolbar_icon_width);
+        final int width = binding.toolbar.getWidth() - ((toolbarIconWidth * NUM_TOOLBAR_ICON) / 2);
+        Animator createCircularReveal = ViewAnimationUtils.createCircularReveal(binding.toolbar, Theme.isRtl(this) ? binding.toolbar.getWidth() - width : width, binding.toolbar.getHeight() / 2, (float) width, 0.0f);
+        createCircularReveal.setDuration(250);
+        createCircularReveal.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                resetToolbarColors();
+            }
+        });
+        createCircularReveal.start();
+    }
+
+    private void animateCloseSearchToolbarLegacy() {
+        AlphaAnimation alphaAnimation = new AlphaAnimation(1.0f, 0.0f);
+        Animation translateAnimation = new TranslateAnimation(0.0f, 0.0f, 0.0f, (float) (-binding.toolbar.getHeight()));
+        AnimationSet animationSet = new AnimationSet(true);
+        animationSet.addAnimation(alphaAnimation);
+        animationSet.addAnimation(translateAnimation);
+        animationSet.setDuration(220);
+        animationSet.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                resetToolbarColors();
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        binding.toolbar.startAnimation(animationSet);
+    }
+
+    private void resetToolbarColors() {
+        binding.toolbar.setBackgroundColor(Theme.getColor(MainActivity.this, R.attr.colorPrimary));
+        binding.drawerLayout.setStatusBarBackgroundColor(Theme.getColor(MainActivity.this, R.attr.colorPrimaryDark));
+    }
+
+    private void setSearchToolbarColors() {
+        binding.toolbar.setBackgroundColor(ContextCompat.getColor(this, android.R.color.white));
+        binding.drawerLayout.setStatusBarBackgroundColor(ContextCompat.getColor(this, R.color.quantum_grey_600));
+    }
+
+    @Override
+    public void onTermSearched(String term) {
+        this.currentSearchTerm = term;
+        Log.d("lttrs","on term searched "+term);
     }
 }

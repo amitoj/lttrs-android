@@ -15,6 +15,8 @@
 
 package rs.ltt.android.entity;
 
+import android.util.Log;
+
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 
@@ -76,7 +78,6 @@ public class FullEmail {
         EmailBodyPartEntity first = Iterables.getFirst(textBody, null);
         Map<String, EmailBodyValueEntity> map = Maps.uniqueIndex(bodyValueEntities, value -> value.partId);
         EmailBodyValueEntity value = map.get(first.partId);
-
         return value.value;
     }
 

@@ -18,8 +18,6 @@ package rs.ltt.android.ui.fragment;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -43,16 +41,9 @@ import rs.ltt.android.ui.model.AbstractQueryViewModel;
 
 public abstract class AbstractQueryFragment extends Fragment implements OnFlaggedToggled, ThreadOverviewAdapter.OnThreadClicked, QueryItemTouchHelper.OnQueryItemSwipe {
 
-    private FragmentThreadListBinding binding;
+    protected FragmentThreadListBinding binding;
 
     private final ThreadOverviewAdapter threadOverviewAdapter = new ThreadOverviewAdapter();
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-    }
-
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -94,12 +85,6 @@ public abstract class AbstractQueryFragment extends Fragment implements OnFlagge
         new ItemTouchHelper(queryItemTouchHelper).attachToRecyclerView(binding.threadList);
 
         return binding.getRoot();
-    }
-
-    @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        inflater.inflate(R.menu.fragment_query, menu);
-        super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override

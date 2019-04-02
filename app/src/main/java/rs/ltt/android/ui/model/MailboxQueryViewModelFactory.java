@@ -21,12 +21,12 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-public class MailboxViewModelFactory implements ViewModelProvider.Factory {
+public class MailboxQueryViewModelFactory implements ViewModelProvider.Factory {
 
     private final Application application;
     private final String id;
 
-    public MailboxViewModelFactory(Application application, String id) {
+    public MailboxQueryViewModelFactory(Application application, String id) {
         this.application = application;
         this.id = id;
     }

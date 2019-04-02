@@ -39,8 +39,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
                     android:background="?attr/colorPrimary"
-                    android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
+                    android:theme="@style/ToolbarTheme"
+                    app:collapseIcon="@drawable/ic_arrow_back_black_24dp"
                     app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+                <View
+                    android:id="@+id/anchor_dropdown"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp" />
             </com.google.android.material.appbar.AppBarLayout>
 
             <fragment
