@@ -24,7 +24,7 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
-import rs.ltt.jmap.mua.entity.QueryResultItem;
+import rs.ltt.jmap.mua.util.QueryResultItem;
 
 @Entity(tableName = "query_item",
         foreignKeys = {@ForeignKey(entity = QueryEntity.class,

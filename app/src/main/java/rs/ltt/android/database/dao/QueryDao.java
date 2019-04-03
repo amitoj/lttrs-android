@@ -21,22 +21,21 @@ import java.util.List;
 
 import androidx.paging.DataSource;
 import androidx.room.Dao;
-import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Transaction;
 import rs.ltt.android.entity.EntityType;
 import rs.ltt.android.entity.QueryEntity;
 import rs.ltt.android.entity.QueryItemEntity;
-import rs.ltt.android.entity.QueryItemOverwriteEntity;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.jmap.common.entity.AddedItem;
 import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.common.entity.TypedState;
 import rs.ltt.jmap.mua.cache.CacheConflictException;
+
 import rs.ltt.jmap.mua.cache.QueryUpdate;
-import rs.ltt.jmap.mua.entity.QueryResultItem;
 import rs.ltt.jmap.mua.util.QueryResult;
+import rs.ltt.jmap.mua.util.QueryResultItem;
 
 import static androidx.room.OnConflictStrategy.REPLACE;
 
@@ -72,7 +71,7 @@ public abstract class QueryDao extends AbstractEntityDao<Email> {
     public abstract DataSource.Factory<Integer, ThreadOverviewItem> getThreadOverviewItems(String queryString);
 
     @Transaction
-    public void set(String queryString, QueryResult<Email> queryResult) {
+    public void set(String queryString, QueryResult queryResult) {
         TypedState<Email> emailState = queryResult.objectState;
         throwOnCacheConflict(EntityType.EMAIL, emailState);
         //TODO delete old
@@ -81,7 +80,7 @@ public abstract class QueryDao extends AbstractEntityDao<Email> {
     }
 
     @Transaction
-    public void add(String queryString, QueryResult<Email> queryResult) {
+    public void add(String queryString, QueryResult queryResult) {
 
         final QueryEntity queryEntity = get(queryString);
 

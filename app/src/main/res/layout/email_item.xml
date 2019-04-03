@@ -105,7 +105,7 @@
                 android:layout_marginEnd="16dp"
                 android:layout_toEndOf="@id/from"
                 android:maxLines="1"
-                android:text="@{email.receivedAt}"
+                app:date="@{email.receivedAt}"
                 android:textAppearance="?textAppearanceCaption"
                 tools:text="Mar 24" />
 

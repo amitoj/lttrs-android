@@ -29,6 +29,7 @@ import rs.ltt.android.R;
 import rs.ltt.android.databinding.ThreadOverviewItemBinding;
 import rs.ltt.android.databinding.ThreadOverviewItemLoadingBinding;
 import rs.ltt.android.entity.ThreadOverviewItem;
+import rs.ltt.android.ui.BindingAdapters;
 import rs.ltt.android.util.Touch;
 
 public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, ThreadOverviewAdapter.AbstractThreadOverviewViewHolder> {
@@ -86,7 +87,7 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
             threadOverviewHolder.binding.starToggle.setOnClickListener(v -> {
                 if (onFlaggedToggled != null) {
                     final boolean target = !item.showAsFlagged();
-                    ThreadOverviewItem.setIsFlagged(threadOverviewHolder.binding.starToggle, target);
+                    BindingAdapters.setIsFlagged(threadOverviewHolder.binding.starToggle, target);
                     onFlaggedToggled.onFlaggedToggled(item.threadId, target);
                 }
             });

@@ -21,9 +21,8 @@ import java.util.List;
 import java.util.Set;
 
 import androidx.room.Relation;
-import rs.ltt.android.util.Keywords;
-import rs.ltt.jmap.common.entity.IdentifiableEmailWithMailboxIds;
 import rs.ltt.jmap.common.entity.Keyword;
+import rs.ltt.jmap.mua.util.KeywordUtil;
 
 public class ThreadHeader {
 
@@ -41,7 +40,7 @@ public class ThreadHeader {
         Log.d("lttrs","showAsFlagged(). num overwrites: "+keywordOverwriteEntities.size());
 
         KeywordOverwriteEntity flaggedOverwrite = KeywordOverwriteEntity.getKeywordOverwrite(keywordOverwriteEntities, Keyword.FLAGGED);
-        return flaggedOverwrite != null ? flaggedOverwrite.value : Keywords.anyHas(emailsWithKeywords, Keyword.FLAGGED);
+        return flaggedOverwrite != null ? flaggedOverwrite.value : KeywordUtil.anyHas(emailsWithKeywords, Keyword.FLAGGED);
     }
 
 

@@ -15,15 +15,6 @@
 
 package rs.ltt.android.entity;
 
-import android.content.res.ColorStateList;
-import android.graphics.Typeface;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
-import android.text.style.StyleSpan;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
-
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
@@ -31,10 +22,8 @@ import com.google.common.collect.Maps;
 
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -43,16 +32,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-import androidx.core.content.ContextCompat;
-import androidx.core.widget.ImageViewCompat;
-import androidx.databinding.BindingAdapter;
 import androidx.room.Ignore;
 import androidx.room.Relation;
-import rs.ltt.android.R;
-import rs.ltt.android.ui.AvatarDrawable;
-import rs.ltt.android.util.Keywords;
 import rs.ltt.jmap.common.entity.IdentifiableEmailWithKeywords;
 import rs.ltt.jmap.common.entity.Keyword;
+import rs.ltt.jmap.mua.util.KeywordUtil;
 
 public class ThreadOverviewItem {
 
@@ -91,12 +75,12 @@ public class ThreadOverviewItem {
 
     public boolean everyHasSeenKeyword() {
         KeywordOverwriteEntity seenOverwrite = KeywordOverwriteEntity.getKeywordOverwrite(keywordOverwriteEntities, Keyword.SEEN);
-        return seenOverwrite != null ? seenOverwrite.value : Keywords.everyHas(getOrderedEmails(), Keyword.SEEN);
+        return seenOverwrite != null ? seenOverwrite.value : KeywordUtil.everyHas(getOrderedEmails(), Keyword.SEEN);
     }
 
     public boolean showAsFlagged() {
         KeywordOverwriteEntity flaggedOverwrite = KeywordOverwriteEntity.getKeywordOverwrite(keywordOverwriteEntities, Keyword.FLAGGED);
-        return flaggedOverwrite != null ? flaggedOverwrite.value : Keywords.anyHas(getOrderedEmails(),Keyword.FLAGGED);
+        return flaggedOverwrite != null ? flaggedOverwrite.value : KeywordUtil.anyHas(getOrderedEmails(),Keyword.FLAGGED);
     }
 
 
@@ -265,90 +249,6 @@ public class ThreadOverviewItem {
         @Override
         public int hashCode() {
             return Objects.hashCode(name, seen);
-        }
-    }
-
-    @BindingAdapter("android:text")
-    public static void setFroms(final TextView textView, final From[] froms) {
-        final boolean shorten = froms.length > 1;
-        SpannableStringBuilder builder = new SpannableStringBuilder();
-        for (int i = 0; i < froms.length; ++i) {
-            From from = froms[i];
-            if (builder.length() != 0) {
-                builder.append(", ");
-            }
-            int start = builder.length();
-            builder.append(shorten ? from.name.split("\\s")[0] : from.name);
-            if (!from.seen) {
-                builder.setSpan(new StyleSpan(Typeface.BOLD), start, builder.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            }
-            if (froms.length > 3) {
-                if (i < froms.length - 3) {
-                    builder.append(" … "); //TODO small?
-                    i = froms.length - 3;
-                }
-            }
-        }
-        textView.setText(builder);
-    }
-
-    private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm");
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MMM dd");
-
-    private static boolean isToday(Date date) {
-        Calendar today = Calendar.getInstance();
-        Calendar specifiedDate = Calendar.getInstance();
-        specifiedDate.setTime(date);
-
-        return today.get(Calendar.DAY_OF_MONTH) == specifiedDate.get(Calendar.DAY_OF_MONTH)
-                && today.get(Calendar.MONTH) == specifiedDate.get(Calendar.MONTH)
-                && today.get(Calendar.YEAR) == specifiedDate.get(Calendar.YEAR);
-    }
-
-    @BindingAdapter("android:text")
-    public static void setInteger(TextView textView, Date receivedAt) {
-        if (receivedAt == null || receivedAt.getTime() <= 0) {
-            textView.setVisibility(View.GONE);
-        } else {
-            textView.setVisibility(View.VISIBLE);
-            if (isToday(receivedAt)) { //TODO or less than 6 hours ago
-                textView.setText(TIME_FORMAT.format(receivedAt));
-            } else {
-                textView.setText(DATE_FORMAT.format(receivedAt));
-            }
-        }
-    }
-
-    @BindingAdapter("android:typeface")
-    public static void setTypeface(TextView v, String style) {
-        switch (style) {
-            case "bold":
-                v.setTypeface(null, Typeface.BOLD);
-                break;
-            default:
-                v.setTypeface(null, Typeface.NORMAL);
-                break;
-        }
-    }
-
-    //TODO: refactor out into BindingAdapters
-    @BindingAdapter("isFlagged")
-    public static void setIsFlagged(final ImageView imageView, final boolean isFlagged) {
-        if (isFlagged) {
-            imageView.setImageResource(R.drawable.ic_star_black_24dp);
-            ImageViewCompat.setImageTintList(imageView, ColorStateList.valueOf(ContextCompat.getColor(imageView.getContext(), R.color.colorPrimary)));
-        } else {
-            imageView.setImageResource(R.drawable.ic_star_border_black_24dp);
-            ImageViewCompat.setImageTintList(imageView, ColorStateList.valueOf(ContextCompat.getColor(imageView.getContext(), R.color.black54)));
-        }
-    }
-
-    @BindingAdapter("from")
-    public static void setFrom(final ImageView imageView, final Map.Entry<String, ThreadOverviewItem.From> from) {
-        if (from == null) {
-            imageView.setImageDrawable(new AvatarDrawable(null,null));
-        } else {
-            imageView.setImageDrawable(new AvatarDrawable(from.getValue().name, from.getKey()));
         }
     }
 }

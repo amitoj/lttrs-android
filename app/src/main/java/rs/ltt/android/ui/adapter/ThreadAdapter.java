@@ -34,6 +34,7 @@ import rs.ltt.android.databinding.EmailItemBinding;
 import rs.ltt.android.entity.FullEmail;
 import rs.ltt.android.entity.ThreadHeader;
 import rs.ltt.android.entity.ThreadOverviewItem;
+import rs.ltt.android.ui.BindingAdapters;
 import rs.ltt.android.util.Touch;
 
 public class ThreadAdapter extends RecyclerView.Adapter<ThreadAdapter.AbstractThreadItemViewHolder> {
@@ -91,7 +92,7 @@ public class ThreadAdapter extends RecyclerView.Adapter<ThreadAdapter.AbstractTh
             headerViewHolder.binding.starToggle.setOnClickListener(v -> {
                 if (onFlaggedToggled != null && threadHeader != null) {
                     final boolean target = !threadHeader.showAsFlagged();
-                    ThreadOverviewItem.setIsFlagged(headerViewHolder.binding.starToggle, target);
+                    BindingAdapters.setIsFlagged(headerViewHolder.binding.starToggle, target);
                     onFlaggedToggled.onFlaggedToggled(threadHeader.threadId, target);
                 }
             });
