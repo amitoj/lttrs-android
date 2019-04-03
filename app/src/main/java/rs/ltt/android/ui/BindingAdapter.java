@@ -136,10 +136,8 @@ public class BindingAdapter {
 
             int lastLineLength = max;
 
-            boolean breakNextLine = false;
             boolean breakNextBlock = false;
             boolean skipNextBreak = false;
-
             StringBuilder stringBuilder = new StringBuilder();
             for (String line : this.lines) {
                 String[] words = line.split("\\s+");
@@ -149,7 +147,7 @@ public class BindingAdapter {
                     boolean listItem = (firstWord.length() <= 3 && (firstWord.endsWith(")") || firstWord.endsWith(":"))) || line.startsWith("* ") || line.startsWith("- ") || (firstWord.matches("\\[[0-9]+]:"));
                     if (skipNextBreak) {
                         //do nothing
-                    } else if (breakNextLine || breakNextBlock) {
+                    } else if (breakNextBlock) {
                         stringBuilder.append('\n');
                     } else if (line.isEmpty()) {
                         stringBuilder.append('\n');
@@ -167,7 +165,7 @@ public class BindingAdapter {
                     skipNextBreak = true;
                 }
 
-                breakNextLine = line.endsWith(":") || !line.contains(" "); //TODO maybe not break on every :
+                skipNextBreak |= line.endsWith(" ");
                 final boolean blockBoundary = line.matches("_{2,}");
                 breakNextBlock = (breakNextBlock && !line.isEmpty() && !blockBoundary) || (blockBoundary && !breakNextBlock);
                 stringBuilder.append(line);
