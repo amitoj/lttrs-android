@@ -42,6 +42,9 @@
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
+
+        <provider android:name=".provider.EmailSearchSuggestionsProvider"
+            android:authorities="rs.ltt.android.provider.EmailSearchSuggestionsProvider" />
     </application>
 
 </manifest>

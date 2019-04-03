@@ -30,7 +30,7 @@
         <item name="colorControlNormal">@color/material_light_active_icon</item>
         <item name="colorControlHighlight">@color/material_ripple_light</item>
         <item name="autoCompleteTextViewStyle">@style/AutoCompleteTextViewStyle</item>
-        <item name="suggestionRowLayout">@layout/search_view_suggestion_row</item>
+        <item name="suggestionRowLayout">@layout/search_suggestion_item</item>
         <item name="android:maxWidth">9999dp</item>
     </style>
 

@@ -21,8 +21,10 @@ import android.annotation.TargetApi;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.SearchRecentSuggestions;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -47,10 +49,13 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
+import rs.ltt.android.Credentials;
 import rs.ltt.android.MainNavDirections;
 import rs.ltt.android.R;
+import rs.ltt.android.database.LttrsDatabase;
 import rs.ltt.android.databinding.ActivityMainBinding;
 import rs.ltt.android.entity.MailboxOverviewItem;
+import rs.ltt.android.entity.SearchSuggestionEntity;
 import rs.ltt.android.ui.adapter.MailboxListAdapter;
 import rs.ltt.android.ui.fragment.AbstractMailboxQueryFragment;
 import rs.ltt.android.ui.fragment.MailboxQueryFragmentDirections;
@@ -64,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements AbstractMailboxQu
     private static final int NUM_TOOLBAR_ICON = 1;
 
     final MailboxListAdapter mailboxListAdapter = new MailboxListAdapter();
+
     private ActivityMainBinding binding = null;
     private SearchView mSearchView;
 
@@ -195,6 +201,17 @@ public class MainActivity extends AppCompatActivity implements AbstractMailboxQu
                 mSearchView.clearFocus();
             }
             String query = intent.getStringExtra(SearchManager.QUERY);
+
+            if (mSearchView != null) {
+                mSearchView.setQuery(query,false);
+            }
+
+            //SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this, EmailSearchSuggestionsProvider.AUTHORITY, EmailSearchSuggestionsProvider.MODE);
+            //suggestions.saveRecentQuery(query, null);
+
+            new Thread(() -> {
+                LttrsDatabase.getInstance(this, Credentials.username).searchSuggestionDao().insert(SearchSuggestionEntity.of(query));
+            }).start();
             final NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
             navController.navigate(MainNavDirections.actionSearch(query));
         }

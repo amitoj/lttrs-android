@@ -28,6 +28,7 @@ import rs.ltt.android.database.dao.EmailDao;
 import rs.ltt.android.database.dao.MailboxDao;
 import rs.ltt.android.database.dao.OverwriteDao;
 import rs.ltt.android.database.dao.QueryDao;
+import rs.ltt.android.database.dao.SearchSuggestionDao;
 import rs.ltt.android.database.dao.StateDao;
 import rs.ltt.android.database.dao.ThreadDao;
 import rs.ltt.android.entity.EmailBodyPartEntity;
@@ -43,6 +44,7 @@ import rs.ltt.android.entity.MailboxOverwriteEntity;
 import rs.ltt.android.entity.QueryEntity;
 import rs.ltt.android.entity.QueryItemEntity;
 import rs.ltt.android.entity.QueryItemOverwriteEntity;
+import rs.ltt.android.entity.SearchSuggestionEntity;
 import rs.ltt.android.entity.ThreadEntity;
 import rs.ltt.android.entity.ThreadItemEntity;
 
@@ -60,7 +62,8 @@ import rs.ltt.android.entity.ThreadItemEntity;
         QueryItemEntity.class,
         KeywordOverwriteEntity.class,
         MailboxOverwriteEntity.class,
-        QueryItemOverwriteEntity.class
+        QueryItemOverwriteEntity.class,
+        SearchSuggestionEntity.class
 }, version = 1)
 @TypeConverters(Converters.class)
 public abstract class LttrsDatabase extends RoomDatabase {
@@ -78,6 +81,8 @@ public abstract class LttrsDatabase extends RoomDatabase {
     public abstract QueryDao queryDao();
 
     public abstract OverwriteDao overwriteDao();
+
+    public abstract SearchSuggestionDao searchSuggestionDao();
 
     public static LttrsDatabase getInstance(final Context context, final String account) {
         final LttrsDatabase instance = INSTANCES.get(account);
