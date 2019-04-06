@@ -197,21 +197,15 @@ public class MainActivity extends AppCompatActivity implements AbstractMailboxQu
     public void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            if (mSearchView != null) {
-                mSearchView.clearFocus();
-            }
             String query = intent.getStringExtra(SearchManager.QUERY);
 
             if (mSearchView != null) {
                 mSearchView.setQuery(query,false);
+                mSearchView.clearFocus(); //this does not work on all phones / android versions; therefor we have this followed by a requestFocus() on the list
             }
+            binding.mailboxList.requestFocus();
 
-            //SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this, EmailSearchSuggestionsProvider.AUTHORITY, EmailSearchSuggestionsProvider.MODE);
-            //suggestions.saveRecentQuery(query, null);
-
-            new Thread(() -> {
-                LttrsDatabase.getInstance(this, Credentials.username).searchSuggestionDao().insert(SearchSuggestionEntity.of(query));
-            }).start();
+            new Thread(() -> LttrsDatabase.getInstance(this, Credentials.username).searchSuggestionDao().insert(SearchSuggestionEntity.of(query))).start();
             final NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
             navController.navigate(MainNavDirections.actionSearch(query));
         }
