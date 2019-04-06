@@ -20,12 +20,12 @@ import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.format.DateUtils;
 import android.text.style.StyleSpan;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -37,20 +37,20 @@ import androidx.core.widget.ImageViewCompat;
 import androidx.databinding.BindingAdapter;
 import rs.ltt.android.R;
 import rs.ltt.android.entity.ThreadOverviewItem;
-import rs.ltt.android.util.EmailAddressUtil;
+import rs.ltt.jmap.mua.util.EmailAddressUtil;
 import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.mua.util.EmailBodyUtil;
 
 public class BindingAdapters {
 
-    private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm");
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MMM dd");
+    private static final long SIX_HOURS = 1000L * 60 * 60 * 6;
+    private static final long THREE_MONTH = 1000L * 60 * 60 * 24 * 30 * 3;
 
-    private static boolean isToday(Date date) {
-        Calendar today = Calendar.getInstance();
-        Calendar specifiedDate = Calendar.getInstance();
-        specifiedDate.setTime(date);
+    private static boolean sameYear(Calendar today, Calendar specifiedDateDate) {
+        return today.get(Calendar.YEAR) == specifiedDateDate.get(Calendar.YEAR);
+    }
 
+    private static boolean sameDay(Calendar today, Calendar specifiedDate) {
         return today.get(Calendar.DAY_OF_MONTH) == specifiedDate.get(Calendar.DAY_OF_MONTH)
                 && today.get(Calendar.MONTH) == specifiedDate.get(Calendar.MONTH)
                 && today.get(Calendar.YEAR) == specifiedDate.get(Calendar.YEAR);
@@ -61,11 +61,20 @@ public class BindingAdapters {
         if (receivedAt == null || receivedAt.getTime() <= 0) {
             textView.setVisibility(View.GONE);
         } else {
+            Context context = textView.getContext();
+            Calendar specifiedDate = Calendar.getInstance();
+            specifiedDate.setTime(receivedAt);
+            Calendar today = Calendar.getInstance();
             textView.setVisibility(View.VISIBLE);
-            if (isToday(receivedAt)) { //TODO or less than 6 hours ago
-                textView.setText(TIME_FORMAT.format(receivedAt));
+
+            long diff = today.getTimeInMillis() - specifiedDate.getTimeInMillis();
+
+            if (sameDay(today, specifiedDate) || diff < SIX_HOURS) {
+                textView.setText(DateUtils.formatDateTime(context, receivedAt.getTime(), DateUtils.FORMAT_SHOW_TIME));
+            } else if (sameYear(today, specifiedDate) || diff < THREE_MONTH) {
+                textView.setText(DateUtils.formatDateTime(context,  receivedAt.getTime(), DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_YEAR | DateUtils.FORMAT_ABBREV_ALL));
             } else {
-                textView.setText(DATE_FORMAT.format(receivedAt));
+                textView.setText(DateUtils.formatDateTime(context,  receivedAt.getTime(), DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_MONTH_DAY | DateUtils.FORMAT_ABBREV_ALL));
             }
         }
     }
