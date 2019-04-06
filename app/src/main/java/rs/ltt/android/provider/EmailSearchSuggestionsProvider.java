@@ -15,23 +15,17 @@
 
 package rs.ltt.android.provider;
 
-import android.app.SearchManager;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.MatrixCursor;
 import android.net.Uri;
-import android.provider.BaseColumns;
 import android.util.Log;
 
 import com.google.common.base.CharMatcher;
 
-import java.util.Arrays;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import rs.ltt.android.Credentials;
-import rs.ltt.android.R;
 import rs.ltt.android.database.LttrsDatabase;
 
 public class EmailSearchSuggestionsProvider extends ContentProvider {
@@ -45,20 +39,11 @@ public class EmailSearchSuggestionsProvider extends ContentProvider {
     @Nullable
     @Override
     public Cursor query(@NonNull Uri uri, @Nullable String[] projection, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String sortOrder) {
-
         if (selectionArgs == null || selectionArgs.length != 1) {
             return null;
         }
-
-        String query = CharMatcher.is('%').removeFrom(selectionArgs[0]);
-
-        Log.d("lttrs","query for "+selection+" selection args="+ Arrays.asList(selectionArgs));
-
-        Cursor cursor = LttrsDatabase.getInstance(getContext(), Credentials.username).searchSuggestionDao().getSearchSuggestions('%'+query+(query.isEmpty()?"":"%"));
-
-        Log.d("lttrs","cursor size: "+cursor.getCount());
-
-        return cursor;
+        final String query = CharMatcher.is('%').removeFrom(selectionArgs[0]);
+        return LttrsDatabase.getInstance(getContext(), Credentials.username).searchSuggestionDao().getSearchSuggestions(query);
     }
 
     @Nullable
