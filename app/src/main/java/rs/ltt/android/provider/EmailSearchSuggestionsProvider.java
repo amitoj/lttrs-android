@@ -26,6 +26,7 @@ import com.google.common.base.CharMatcher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import rs.ltt.android.Credentials;
+import rs.ltt.android.database.AppDatabase;
 import rs.ltt.android.database.LttrsDatabase;
 
 public class EmailSearchSuggestionsProvider extends ContentProvider {
@@ -43,7 +44,7 @@ public class EmailSearchSuggestionsProvider extends ContentProvider {
             return null;
         }
         final String query = CharMatcher.is('%').removeFrom(selectionArgs[0]);
-        return LttrsDatabase.getInstance(getContext(), Credentials.username).searchSuggestionDao().getSearchSuggestions(query);
+        return AppDatabase.getInstance(getContext()).searchSuggestionDao().getSearchSuggestions(query);
     }
 
     @Nullable

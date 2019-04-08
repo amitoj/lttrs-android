@@ -25,18 +25,27 @@ import androidx.lifecycle.LiveData;
 import rs.ltt.android.Credentials;
 import rs.ltt.android.database.LttrsDatabase;
 import rs.ltt.android.entity.MailboxOverviewItem;
+import rs.ltt.android.repository.MainRepository;
 
-public class MailboxListViewModel extends AndroidViewModel {
+public class MainViewModel extends AndroidViewModel {
+
+    private MainRepository mainRepository;
 
     private final LiveData<List<MailboxOverviewItem>> mailboxes;
 
 
-    public MailboxListViewModel(@NonNull Application application) {
+    public MainViewModel(@NonNull Application application) {
         super(application);
-        this.mailboxes = LttrsDatabase.getInstance(application.getApplicationContext(), Credentials.username).mailboxDao().getMailboxes();
+        this.mainRepository = new MainRepository(application);
+        this.mailboxes = this.mainRepository.getMailboxes();
     }
 
     public LiveData<List<MailboxOverviewItem>> getMailboxes() {
         return this.mailboxes;
+    }
+
+
+    public void insertSearchSuggestion(String term) {
+        this.mainRepository.insertSearchSuggestion(term);
     }
 }

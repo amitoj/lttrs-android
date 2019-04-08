@@ -38,7 +38,7 @@ import rs.ltt.jmap.common.entity.Keyword;
 
 public abstract class AbstractQueryViewModel extends AndroidViewModel {
 
-    protected final QueryRepository queryRepository;
+    final QueryRepository queryRepository;
 
     private LiveData<PagedList<ThreadOverviewItem>> threads;
 

@@ -38,7 +38,6 @@ public class SearchQueryViewModel extends AbstractQueryViewModel {
 
     SearchQueryViewModel(final Application application, final String searchTerm) {
         super(application);
-        LttrsDatabase lttrsDatabase = LttrsDatabase.getInstance(application, Credentials.username);
         this.searchTerm = new MutableLiveData<>(searchTerm);
         this.searchQueryLiveData = Transformations.map(this.searchTerm, text -> EmailQuery.of(EmailFilterCondition.builder().text(text).build(),true));
         init();

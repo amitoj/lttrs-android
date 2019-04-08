@@ -38,6 +38,8 @@ public class MailboxQueryViewModel extends AbstractQueryViewModel {
 
     MailboxQueryViewModel(final Application application, final String mailboxId) {
         super(application);
+
+        //TODO move those calls into repository
         LttrsDatabase lttrsDatabase = LttrsDatabase.getInstance(application, Credentials.username);
         if (mailboxId == null) {
             this.mailbox = lttrsDatabase.mailboxDao().getMailboxOverviewItemLiveData(Role.INBOX);

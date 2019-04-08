@@ -53,10 +53,9 @@ import rs.ltt.android.R;
 import rs.ltt.android.database.LttrsDatabase;
 import rs.ltt.android.databinding.ActivityMainBinding;
 import rs.ltt.android.entity.MailboxOverviewItem;
-import rs.ltt.android.entity.SearchSuggestionEntity;
 import rs.ltt.android.ui.adapter.MailboxListAdapter;
 import rs.ltt.android.ui.fragment.SearchQueryFragment;
-import rs.ltt.android.ui.model.MailboxListViewModel;
+import rs.ltt.android.ui.model.MainViewModel;
 import rs.ltt.jmap.common.entity.Role;
 
 public class MainActivity extends AppCompatActivity implements OnMailboxOpened, SearchQueryFragment.OnTermSearched, NavController.OnDestinationChangedListener, MenuItem.OnActionExpandListener {
@@ -65,7 +64,8 @@ public class MainActivity extends AppCompatActivity implements OnMailboxOpened, 
 
     final MailboxListAdapter mailboxListAdapter = new MailboxListAdapter();
 
-    private ActivityMainBinding binding = null;
+    private ActivityMainBinding binding;
+    private MainViewModel mainViewModel;
     private MenuItem mSearchItem;
     private SearchView mSearchView;
 
@@ -74,13 +74,14 @@ public class MainActivity extends AppCompatActivity implements OnMailboxOpened, 
             R.id.mailbox
     );
 
+    //TODO: move to viewmodel
     private String currentSearchTerm = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-        MailboxListViewModel mailboxListViewModel = ViewModelProviders.of(this).get(MailboxListViewModel.class);
+        mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
         setSupportActionBar(binding.toolbar);
 
         final NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
@@ -103,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements OnMailboxOpened, 
             binding.appBarLayout.setExpanded(true, false);
         });
         binding.mailboxList.setAdapter(mailboxListAdapter);
-        mailboxListViewModel.getMailboxes().observe(this, mailboxListAdapter::submitList);
+        mainViewModel.getMailboxes().observe(this, mailboxListAdapter::submitList);
     }
 
     @Override
@@ -192,12 +193,12 @@ public class MainActivity extends AppCompatActivity implements OnMailboxOpened, 
             String query = intent.getStringExtra(SearchManager.QUERY);
 
             if (mSearchView != null) {
-                mSearchView.setQuery(query,false);
+                mSearchView.setQuery(query, false);
                 mSearchView.clearFocus(); //this does not work on all phones / android versions; therefor we have this followed by a requestFocus() on the list
             }
             binding.mailboxList.requestFocus();
 
-            new Thread(() -> LttrsDatabase.getInstance(this, Credentials.username).searchSuggestionDao().insert(SearchSuggestionEntity.of(query))).start();
+            mainViewModel.insertSearchSuggestion(query);
             final NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
             navController.navigate(MainNavigationDirections.actionSearch(query));
         }
@@ -328,7 +329,7 @@ public class MainActivity extends AppCompatActivity implements OnMailboxOpened, 
     @Override
     public void onTermSearched(String term) {
         this.currentSearchTerm = term;
-        Log.d("lttrs","on term searched "+term);
+        Log.d("lttrs", "on term searched " + term);
         mailboxListAdapter.setSelectedId(null);
     }
 }
