@@ -25,6 +25,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModelProviders;
 import rs.ltt.android.entity.ThreadOverviewItem;
+import rs.ltt.android.ui.OnMailboxOpened;
 import rs.ltt.android.ui.QueryItemTouchHelper;
 import rs.ltt.android.ui.model.AbstractQueryViewModel;
 import rs.ltt.android.ui.model.SearchQueryViewModel;

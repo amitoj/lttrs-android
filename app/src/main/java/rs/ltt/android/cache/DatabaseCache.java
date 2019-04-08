@@ -101,38 +101,26 @@ public class DatabaseCache implements Cache {
     }
 
     @Override
-    public void setThreads(TypedState<Thread> threadTypedState, Thread[] threads) {
-        database.threadDao().set(threads, threadTypedState.getState());
-        Log.d("lttrs", "saving " + threads.length + " threads");
+    public void setThreadsAndEmails(TypedState<Thread> threadState, Thread[] threads, TypedState<Email> emailState, Email[] emails) {
+        database.threadAndEmailDao().set(threadState, threads, emailState, emails);
     }
 
     @Override
-    public void addThreads(TypedState<Thread> threadTypedState, Thread[] threads) throws CacheConflictException {
-        database.threadDao().add(threadTypedState, threads);
-        Log.d("lttrs", "setting " + threads.length + " threads");
+    public void addThreadsAndEmail(TypedState<Thread> threadState, Thread[] threads, TypedState<Email> emailState, Email[] emails) {
+        database.threadAndEmailDao().add(threadState,threads, emailState, emails);
     }
+
 
     @Override
     public void updateThreads(Update<Thread> update) throws CacheWriteException {
-        database.threadDao().update(update);
+        database.threadAndEmailDao().update(update);
         Log.d("lttrs", "updated some threads "+update.toString());
     }
 
-    @Override
-    public void setEmails(TypedState<Email> emailTypedState, Email[] emails) {
-        database.emailDao().set(emails, emailTypedState.getState());
-        Log.d("lttrs", "setting " + emails.length + " emails");
-    }
-
-    @Override
-    public void addEmails(TypedState<Email> emailTypedState, Email[] emails) throws CacheConflictException {
-        database.emailDao().add(emailTypedState, emails);
-        Log.d("lttrs", "adding " + emails.length + " emails");
-    }
 
     @Override
     public void updateEmails(Update<Email> update, String[] updatedProperties) throws CacheWriteException {
-        database.emailDao().updateEmails(update, updatedProperties);
+        database.threadAndEmailDao().updateEmails(update, updatedProperties);
     }
 
     @Override
@@ -164,7 +152,7 @@ public class DatabaseCache implements Cache {
 
     @Override
     public Missing getMissing(String query) throws CacheReadException {
-        Missing missing = database.threadDao().getMissing(query);
+        Missing missing = database.threadAndEmailDao().getMissing(query);
         Log.d("lttrs", "cache reported " + missing.threadIds.size() + " missing threads");
         return missing;
     }

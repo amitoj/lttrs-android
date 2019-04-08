@@ -24,13 +24,12 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
-import rs.ltt.android.database.dao.EmailDao;
 import rs.ltt.android.database.dao.MailboxDao;
 import rs.ltt.android.database.dao.OverwriteDao;
 import rs.ltt.android.database.dao.QueryDao;
 import rs.ltt.android.database.dao.SearchSuggestionDao;
 import rs.ltt.android.database.dao.StateDao;
-import rs.ltt.android.database.dao.ThreadDao;
+import rs.ltt.android.database.dao.ThreadAndEmailDao;
 import rs.ltt.android.entity.EmailBodyPartEntity;
 import rs.ltt.android.entity.EmailBodyValueEntity;
 import rs.ltt.android.entity.EmailEmailAddressEntity;
@@ -70,9 +69,7 @@ public abstract class LttrsDatabase extends RoomDatabase {
 
     private static Map<String, LttrsDatabase> INSTANCES = new HashMap<>();
 
-    public abstract EmailDao emailDao();
-
-    public abstract ThreadDao threadDao();
+    public abstract ThreadAndEmailDao threadAndEmailDao();
 
     public abstract MailboxDao mailboxDao();
 

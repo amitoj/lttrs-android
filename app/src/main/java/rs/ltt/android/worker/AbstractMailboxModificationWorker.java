@@ -45,7 +45,7 @@ public abstract class AbstractMailboxModificationWorker extends MuaWorker {
     @NonNull
     @Override
     public Result doWork() {
-        List<EmailWithMailboxes> emails = threadId == null ? Collections.emptyList() : database.emailDao().getEmailsWithMailboxes(threadId);
+        List<EmailWithMailboxes> emails = threadId == null ? Collections.emptyList() : database.threadAndEmailDao().getEmailsWithMailboxes(threadId);
         Log.d("lttrs", getClass().getSimpleName() + ": threadId=" + threadId + " (" + emails.size() + ")");
         try {
             Boolean result = modify(emails).get();

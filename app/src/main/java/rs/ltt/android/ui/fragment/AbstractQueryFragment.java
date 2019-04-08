@@ -29,7 +29,7 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import rs.ltt.android.MainNavDirections;
+import rs.ltt.android.MainNavigationDirections;
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.FragmentThreadListBinding;
 import rs.ltt.android.entity.ThreadOverviewItem;
@@ -97,7 +97,7 @@ public abstract class AbstractQueryFragment extends Fragment implements OnFlagge
     @Override
     public void onThreadClicked(String threadId) {
         final NavController navController = Navigation.findNavController(getActivity(), R.id.nav_host_fragment);
-        navController.navigate(MainNavDirections.actionToThread(threadId, null));
+        navController.navigate(MainNavigationDirections.actionToThread(threadId, null));
     }
 
     @Override

@@ -40,7 +40,7 @@ import rs.ltt.jmap.mua.util.QueryResultItem;
 import static androidx.room.OnConflictStrategy.REPLACE;
 
 @Dao
-public abstract class QueryDao extends AbstractEntityDao<Email> {
+public abstract class QueryDao extends AbstractEntityDao {
 
 
     @Insert(onConflict = REPLACE)

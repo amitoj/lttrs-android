@@ -21,10 +21,8 @@ import android.annotation.TargetApi;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.SearchRecentSuggestions;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -50,27 +48,25 @@ import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
 import rs.ltt.android.Credentials;
-import rs.ltt.android.MainNavDirections;
+import rs.ltt.android.MainNavigationDirections;
 import rs.ltt.android.R;
 import rs.ltt.android.database.LttrsDatabase;
 import rs.ltt.android.databinding.ActivityMainBinding;
 import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.android.entity.SearchSuggestionEntity;
 import rs.ltt.android.ui.adapter.MailboxListAdapter;
-import rs.ltt.android.ui.fragment.AbstractMailboxQueryFragment;
-import rs.ltt.android.ui.fragment.MailboxQueryFragmentDirections;
-import rs.ltt.android.ui.fragment.MainMailboxQueryFragmentDirections;
 import rs.ltt.android.ui.fragment.SearchQueryFragment;
 import rs.ltt.android.ui.model.MailboxListViewModel;
 import rs.ltt.jmap.common.entity.Role;
 
-public class MainActivity extends AppCompatActivity implements AbstractMailboxQueryFragment.OnMailboxOpened, SearchQueryFragment.OnTermSearched, NavController.OnDestinationChangedListener, MenuItem.OnActionExpandListener {
+public class MainActivity extends AppCompatActivity implements OnMailboxOpened, SearchQueryFragment.OnTermSearched, NavController.OnDestinationChangedListener, MenuItem.OnActionExpandListener {
 
     private static final int NUM_TOOLBAR_ICON = 1;
 
     final MailboxListAdapter mailboxListAdapter = new MailboxListAdapter();
 
     private ActivityMainBinding binding = null;
+    private MenuItem mSearchItem;
     private SearchView mSearchView;
 
     private static final List<Integer> MAIN_DESTINATIONS = Arrays.asList(
@@ -92,21 +88,16 @@ public class MainActivity extends AppCompatActivity implements AbstractMailboxQu
         mailboxListAdapter.setOnMailboxOverviewItemSelectedListener(mailboxOverviewItem -> {
             binding.drawerLayout.closeDrawer(GravityCompat.START);
             final boolean navigateToInbox = mailboxOverviewItem.role == Role.INBOX;
-            NavDestination currentDestination = navController.getCurrentDestination();
-            if (currentDestination != null && currentDestination.getId() == R.id.inbox) {
-                if (navigateToInbox) {
-                    return;
-                }
-                navController.navigate(MainMailboxQueryFragmentDirections.actionInboxToMailbox(mailboxOverviewItem.id));
-            } else if (currentDestination != null && currentDestination.getId() == R.id.mailbox) {
-                if (navigateToInbox) {
-                    navController.navigate(MailboxQueryFragmentDirections.actionMailboxToInbox());
-                } else {
-                    if (mailboxOverviewItem.id.equals(mailboxListAdapter.getSelectedId())) {
-                        return;
-                    }
-                    navController.navigate(MailboxQueryFragmentDirections.actionMailboxToMailbox(mailboxOverviewItem.id));
-                }
+            if (mailboxOverviewItem.id.equals(mailboxListAdapter.getSelectedId())) {
+                return;
+            }
+            if (navigateToInbox) {
+                navController.navigate(MainNavigationDirections.actionToInbox());
+            } else {
+                navController.navigate(MainNavigationDirections.actionToMailbox(mailboxOverviewItem.id));
+            }
+            if (mSearchItem != null) {
+                mSearchItem.collapseActionView();
             }
             //currently unused should remain here in case we bring scrollable toolbar back
             binding.appBarLayout.setExpanded(true, false);
@@ -122,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements AbstractMailboxQu
 
         getMenuInflater().inflate(R.menu.activity_main, menu);
 
-        MenuItem mSearchItem = menu.findItem(R.id.action_search);
+        mSearchItem = menu.findItem(R.id.action_search);
 
         mSearchItem.setVisible(showSearch);
 
@@ -138,6 +129,7 @@ public class MainActivity extends AppCompatActivity implements AbstractMailboxQu
             }
             mSearchItem.setOnActionExpandListener(this);
         } else {
+            mSearchItem = null;
             mSearchView = null;
             resetToolbarColors();
         }
@@ -207,7 +199,7 @@ public class MainActivity extends AppCompatActivity implements AbstractMailboxQu
 
             new Thread(() -> LttrsDatabase.getInstance(this, Credentials.username).searchSuggestionDao().insert(SearchSuggestionEntity.of(query))).start();
             final NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-            navController.navigate(MainNavDirections.actionSearch(query));
+            navController.navigate(MainNavigationDirections.actionSearch(query));
         }
 
     }
@@ -337,5 +329,6 @@ public class MainActivity extends AppCompatActivity implements AbstractMailboxQu
     public void onTermSearched(String term) {
         this.currentSearchTerm = term;
         Log.d("lttrs","on term searched "+term);
+        mailboxListAdapter.setSelectedId(null);
     }
 }

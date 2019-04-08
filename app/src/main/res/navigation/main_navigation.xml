@@ -16,8 +16,19 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main_nav"
+    android:id="@+id/main_navigation"
     app:startDestination="@+id/inbox">
+
+    <action
+        android:id="@+id/action_to_mailbox"
+        app:destination="@+id/mailbox"
+        app:popUpTo="@+id/inbox" />
+
+    <action
+        android:id="@+id/action_to_inbox"
+        app:destination="@+id/inbox"
+        app:popUpTo="@+id/inbox"
+        app:popUpToInclusive="true" />
 
     <action
         android:id="@+id/action_to_thread"
@@ -27,18 +38,13 @@
         android:id="@+id/action_search"
         app:destination="@+id/search"
         app:popUpTo="@+id/search"
-        app:popUpToInclusive="true"/>
+        app:popUpToInclusive="true" />
 
     <fragment
         android:id="@+id/inbox"
         android:name="rs.ltt.android.ui.fragment.MainMailboxQueryFragment"
         android:label="inbox"
-        tools:layout="@layout/fragment_thread_list">
-        <action
-            android:id="@+id/action_inbox_to_mailbox"
-            app:destination="@+id/mailbox"
-            app:popUpTo="@+id/inbox" />
-    </fragment>
+        tools:layout="@layout/fragment_thread_list" />
 
     <fragment
         android:id="@+id/mailbox"
@@ -49,15 +55,6 @@
             android:name="mailbox"
             app:argType="string"
             app:nullable="false" />
-        <action
-            android:id="@+id/action_mailbox_to_mailbox"
-            app:destination="@+id/mailbox"
-            app:popUpTo="@+id/inbox" />
-        <action
-            android:id="@+id/action_mailbox_to_inbox"
-            app:destination="@+id/inbox"
-            app:popUpTo="@+id/inbox"
-            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment

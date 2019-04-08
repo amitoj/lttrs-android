@@ -34,11 +34,11 @@ public class ThreadRepository extends LttrsRepository {
     }
 
     public LiveData<PagedList<FullEmail>> getEmails(String threadId) {
-        return new LivePagedListBuilder<>(database.emailDao().getEmails(threadId), 30).build();
+        return new LivePagedListBuilder<>(database.threadAndEmailDao().getEmails(threadId), 30).build();
     }
 
     public LiveData<ThreadHeader> getThreadHeader(String threadId) {
-        return database.emailDao().getThreadHeader(threadId);
+        return database.threadAndEmailDao().getThreadHeader(threadId);
     }
 
     public LiveData<List<MailboxWithRoleAndName>> getMailboxes(String threadId) {

@@ -53,7 +53,7 @@ public class ModifyKeywordWorker extends MuaWorker {
     @Override
     public Result doWork() {
         Log.d("lttrs","ModifyKeywordWorker. threadId="+threadId+" target="+target);
-        List<EmailWithKeywords> emails = threadId == null ? Collections.emptyList() : database.emailDao().getEmailsWithKeywords(threadId);
+        List<EmailWithKeywords> emails = threadId == null ? Collections.emptyList() : database.threadAndEmailDao().getEmailsWithKeywords(threadId);
         try {
             final boolean madeChanges;
             if (target) {

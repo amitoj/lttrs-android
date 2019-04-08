@@ -26,6 +26,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModelProviders;
 import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.android.entity.ThreadOverviewItem;
+import rs.ltt.android.ui.OnMailboxOpened;
 import rs.ltt.android.ui.QueryItemTouchHelper;
 import rs.ltt.android.ui.model.AbstractQueryViewModel;
 import rs.ltt.android.ui.model.MailboxQueryViewModel;
@@ -35,7 +36,7 @@ import rs.ltt.jmap.common.entity.Role;
 
 public abstract class AbstractMailboxQueryFragment extends AbstractQueryFragment {
 
-    protected MailboxQueryViewModel mailboxQueryViewModel;
+    MailboxQueryViewModel mailboxQueryViewModel;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -76,9 +77,6 @@ public abstract class AbstractMailboxQueryFragment extends AbstractQueryFragment
         }
     }
 
-    public interface OnMailboxOpened {
-        void onMailboxOpened(MailboxOverviewItem mailboxOverviewItem);
-    }
 
     protected abstract String getMailboxId();
 

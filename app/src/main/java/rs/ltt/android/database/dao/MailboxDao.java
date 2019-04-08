@@ -35,7 +35,7 @@ import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.mua.cache.Update;
 
 @Dao
-public abstract class MailboxDao extends AbstractEntityDao<Mailbox> {
+public abstract class MailboxDao extends AbstractEntityDao {
 
     @Insert
     protected abstract void insert(MailboxEntity mailboxEntity);

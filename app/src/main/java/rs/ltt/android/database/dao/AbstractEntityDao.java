@@ -24,7 +24,7 @@ import rs.ltt.jmap.common.entity.AbstractIdentifiableEntity;
 import rs.ltt.jmap.common.entity.TypedState;
 import rs.ltt.jmap.mua.cache.CacheConflictException;
 
-public abstract class AbstractEntityDao<T extends AbstractIdentifiableEntity> {
+public abstract class AbstractEntityDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     protected abstract void insert(EntityStateEntity entityStateEntity);
@@ -35,7 +35,7 @@ public abstract class AbstractEntityDao<T extends AbstractIdentifiableEntity> {
     @Query("update entity_state set state=:newState where type=:type and state=:oldState")
     protected abstract int updateState(EntityType type, String oldState, String newState);
 
-    void throwOnCacheConflict(EntityType type, TypedState<T> expectedTypedState) {
+    void throwOnCacheConflict(EntityType type, TypedState expectedTypedState) {
         final String expectedState = expectedTypedState.getState();
         final String currentState = getState(type);
         if (expectedState == null || !expectedState.equals(currentState)) {
@@ -43,7 +43,7 @@ public abstract class AbstractEntityDao<T extends AbstractIdentifiableEntity> {
         }
     }
 
-    void throwOnUpdateConflict(final EntityType type, final TypedState<T> oldTypedState, final TypedState<T> newTypedState) {
+    void throwOnUpdateConflict(final EntityType type, final TypedState oldTypedState, final TypedState newTypedState) {
         final String oldState = oldTypedState.getState();
         final String newState = newTypedState.getState();
         if (updateState(type, oldState, newState) != 1) {

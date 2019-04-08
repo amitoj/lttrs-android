@@ -49,7 +49,7 @@ public class RemoveFromMailboxWorker extends MuaWorker {
     @NonNull
     @Override
     public Result doWork() {
-        List<EmailWithMailboxes> emails = threadId == null ? Collections.emptyList() : database.emailDao().getEmailsWithMailboxes(threadId);
+        List<EmailWithMailboxes> emails = threadId == null ? Collections.emptyList() : database.threadAndEmailDao().getEmailsWithMailboxes(threadId);
         Log.d("lttrs", "RemoveFromMailboxWorker. threadId=" + threadId + " ("+emails.size()+") mailbox=" + mailboxId);
         try {
             Boolean result = mua.removeFromMailbox(emails, this.mailboxId).get();
