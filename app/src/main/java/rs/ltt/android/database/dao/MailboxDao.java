@@ -17,6 +17,8 @@ package rs.ltt.android.database.dao;
 
 import android.util.Log;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,6 +56,9 @@ public abstract class MailboxDao extends AbstractEntityDao {
 
     @Query("select id,parentId,name,sortOrder,unreadThreads,totalThreads,role from mailbox where role=:role limit 1")
     public abstract LiveData<MailboxOverviewItem> getMailboxOverviewItemLiveData(Role role);
+
+    @Query("select id,role,name from mailbox where role=:role limit 1")
+    public abstract ListenableFuture<MailboxWithRoleAndName> getMailbox(Role role);
 
     @Query("select id,parentId,name,sortOrder,unreadThreads,totalThreads,role from mailbox where role=:role limit 1")
     public abstract MailboxOverviewItem getMailboxOverviewItem(Role role);

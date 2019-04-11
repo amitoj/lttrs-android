@@ -43,11 +43,15 @@ import rs.ltt.android.Credentials;
 import rs.ltt.android.cache.DatabaseCache;
 import rs.ltt.android.database.LttrsDatabase;
 import rs.ltt.android.entity.KeywordOverwriteEntity;
+import rs.ltt.android.entity.MailboxOverviewItem;
+import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.android.worker.ModifyKeywordWorker;
 import rs.ltt.jmap.client.session.SessionFileCache;
 import rs.ltt.jmap.common.entity.EmailQuery;
+import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
 import rs.ltt.jmap.common.entity.Keyword;
+import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.mua.Mua;
 
 public class QueryRepository extends LttrsRepository {
@@ -81,6 +85,10 @@ public class QueryRepository extends LttrsRepository {
                     }
                 })
                 .build();
+    }
+
+    public ListenableFuture<MailboxWithRoleAndName> getInbox() {
+        return database.mailboxDao().getMailbox(Role.INBOX);
     }
 
 

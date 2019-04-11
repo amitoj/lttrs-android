@@ -17,6 +17,7 @@ package rs.ltt.android.entity;
 
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 
@@ -35,6 +36,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import androidx.room.Ignore;
 import androidx.room.Relation;
 import rs.ltt.jmap.common.entity.IdentifiableEmailWithKeywords;
+import rs.ltt.jmap.common.entity.IdentifiableEmailWithMailboxIds;
 import rs.ltt.jmap.common.entity.Keyword;
 import rs.ltt.jmap.mua.util.KeywordUtil;
 
@@ -56,6 +58,9 @@ public class ThreadOverviewItem {
 
     @Relation(parentColumn = "threadId", entityColumn = "threadId")
     public Set<KeywordOverwriteEntity> keywordOverwriteEntities;
+
+    @Relation(parentColumn = "threadId", entityColumn = "threadId")
+    public Set<MailboxOverwriteEntity> mailboxOverwriteEntities;
 
 
     public String getPreview() {
@@ -162,6 +167,14 @@ public class ThreadOverviewItem {
         return orderedList;
     }
 
+    private Set<String> getMailboxIds() {
+        ImmutableSet.Builder<String> builder = ImmutableSet.builder();
+        for(Email email : emails) {
+            builder.addAll(email.mailboxes);
+        }
+        return builder.build();
+    }
+
     public From[] getFromValues() {
         return getFromMap().values().toArray(new From[0]);
     }
@@ -175,6 +188,8 @@ public class ThreadOverviewItem {
                 Objects.equal(getPreview(), item.getPreview()) &&
                 Objects.equal(showAsFlagged(), item.showAsFlagged()) &&
                 Objects.equal(getReceivedAt(), item.getReceivedAt()) &&
+                Objects.equal(mailboxOverwriteEntities, item.mailboxOverwriteEntities) &&
+                Objects.equal(getMailboxIds(), item.getMailboxIds()) &&
                 Objects.equal(everyHasSeenKeyword(), item.everyHasSeenKeyword()) &&
                 Arrays.equals(getFromValues(),item.getFromValues());
     }
@@ -184,7 +199,7 @@ public class ThreadOverviewItem {
         return Objects.hashCode(emailId, threadId, getOrderedEmails(), threadItemEntities);
     }
 
-    public static class Email implements IdentifiableEmailWithKeywords {
+    public static class Email implements IdentifiableEmailWithKeywords, IdentifiableEmailWithMailboxIds {
 
         public String id;
         public String preview;
@@ -194,6 +209,9 @@ public class ThreadOverviewItem {
 
         @Relation(entity = EmailKeywordEntity.class, parentColumn = "id", entityColumn = "emailId", projection = {"keyword"})
         public Set<String> keywords;
+
+        @Relation(entity = EmailMailboxEntity.class, parentColumn = "id", entityColumn = "emailId", projection = {"mailboxId"})
+        public Set<String> mailboxes;
 
         @Relation(entity = EmailEmailAddressEntity.class, parentColumn = "id", entityColumn = "emailId", projection = {"email", "name", "type"})
         public List<EmailAddress> emailAddresses;
@@ -225,6 +243,11 @@ public class ThreadOverviewItem {
         @Override
         public String getId() {
             return id;
+        }
+
+        @Override
+        public Map<String, Boolean> getMailboxIds() {
+            return Maps.asMap(mailboxes, id -> true);
         }
     }
 

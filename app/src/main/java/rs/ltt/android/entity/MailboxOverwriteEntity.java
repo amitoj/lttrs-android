@@ -15,6 +15,8 @@
 
 package rs.ltt.android.entity;
 
+import com.google.common.base.Objects;
+
 import java.util.Collection;
 
 import androidx.annotation.NonNull;
@@ -70,5 +72,21 @@ public class MailboxOverwriteEntity {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MailboxOverwriteEntity entity = (MailboxOverwriteEntity) o;
+        return value == entity.value &&
+                Objects.equal(threadId, entity.threadId) &&
+                Objects.equal(name, entity.name) &&
+                Objects.equal(role, entity.role);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(threadId, name, role, value);
     }
 }

@@ -125,6 +125,7 @@ public abstract class LttrsRepository {
 
     public void archive(final String threadId) {
         ioExecutor.execute(() -> {
+            Log.d("lttrs","archiving "+threadId);
             insertQueryItemOverwrite(threadId, Role.INBOX);
             deleteQueryItemOverwrite(threadId, Role.ARCHIVE);
             database.overwriteDao().insert(MailboxOverwriteEntity.of(threadId, Role.INBOX, false));

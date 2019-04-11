@@ -67,12 +67,12 @@ public class SearchQueryFragment extends AbstractQueryFragment {
 
     @Override
     protected QueryItemTouchHelper.Swipable onQueryItemSwipe(ThreadOverviewItem item) {
-        return QueryItemTouchHelper.Swipable.NO;
+        return searchQueryViewModel.isInInbox(item) ? QueryItemTouchHelper.Swipable.ARCHIVE : QueryItemTouchHelper.Swipable.NO;
     }
 
     @Override
     protected void onQueryItemSwiped(ThreadOverviewItem item) {
-
+        searchQueryViewModel.archive(item);
     }
 
     public interface OnTermSearched {
