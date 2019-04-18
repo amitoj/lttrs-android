@@ -66,12 +66,6 @@ public class MailboxQueryViewModel extends AbstractQueryViewModel {
         queryRepository.removeFromMailbox(item.threadId, mailbox);
     }
 
-    //TODO: should probably be moved to AbstractQueryViewModel
-    public void archive(ThreadOverviewItem item) {
-        queryRepository.archive(item.threadId);
-    }
-
-
     public LiveData<MailboxOverviewItem> getMailbox() {
         return mailbox;
     }

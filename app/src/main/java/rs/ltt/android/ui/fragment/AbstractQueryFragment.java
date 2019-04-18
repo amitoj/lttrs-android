@@ -121,4 +121,5 @@ public abstract class AbstractQueryFragment extends Fragment implements OnFlagge
     }
 
     protected abstract void onQueryItemSwiped(ThreadOverviewItem item);
+
 }

@@ -93,4 +93,8 @@ public abstract class AbstractQueryViewModel extends AndroidViewModel {
     public void toggleFlagged(String threadId, boolean target) {
         this.queryRepository.toggleFlagged(threadId, target);
     }
+
+    public void archive(ThreadOverviewItem item) {
+        queryRepository.archive(item.threadId);
+    }
 }

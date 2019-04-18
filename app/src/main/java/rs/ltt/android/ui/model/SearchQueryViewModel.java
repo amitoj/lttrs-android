@@ -57,11 +57,6 @@ public class SearchQueryViewModel extends AbstractQueryViewModel {
         return this.searchTerm;
     }
 
-    //TODO: should probably be moved to AbstractQueryViewModel
-    public void archive(ThreadOverviewItem item) {
-        queryRepository.archive(item.threadId);
-    }
-
     @Override
     protected LiveData<EmailQuery> getQuery() {
         return searchQueryLiveData;

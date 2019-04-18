@@ -72,7 +72,7 @@ public class SearchQueryFragment extends AbstractQueryFragment {
 
     @Override
     protected void onQueryItemSwiped(ThreadOverviewItem item) {
-        searchQueryViewModel.archive(item);
+        this.searchQueryViewModel.archive(item);
     }
 
     public interface OnTermSearched {
