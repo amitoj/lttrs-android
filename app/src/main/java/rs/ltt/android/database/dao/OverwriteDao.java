@@ -15,6 +15,8 @@
 
 package rs.ltt.android.database.dao;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
 import java.util.List;
 
 import androidx.lifecycle.LiveData;
@@ -48,6 +50,9 @@ public abstract class OverwriteDao {
 
     @Query("delete from keyword_overwrite where threadId=:threadId")
     public abstract void deleteKeywordOverwritesByThread(String threadId);
+
+    @Query("select * from keyword_overwrite where threadId=:threadId")
+    public abstract ListenableFuture<KeywordOverwriteEntity> getKeywordOverwrite(String threadId);
 
     @Query("select * from mailbox_overwrite where threadId=:threadId")
     public abstract LiveData<List<MailboxOverwriteEntity>> getMailboxOverwrites(String threadId);

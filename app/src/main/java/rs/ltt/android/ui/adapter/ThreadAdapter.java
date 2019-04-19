@@ -19,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.Collection;
 import java.util.Set;
 
 import androidx.annotation.NonNull;
@@ -31,6 +32,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.EmailHeaderBinding;
 import rs.ltt.android.databinding.EmailItemBinding;
+import rs.ltt.android.entity.ExpandedPosition;
 import rs.ltt.android.entity.FullEmail;
 import rs.ltt.android.entity.ThreadHeader;
 import rs.ltt.android.entity.ThreadOverviewItem;
@@ -145,6 +147,16 @@ public class ThreadAdapter extends RecyclerView.Adapter<ThreadAdapter.AbstractTh
 
     public void submitList(PagedList<FullEmail> pagedList) {
         mDiffer.submitList(pagedList);
+    }
+
+    public void submitList(PagedList<FullEmail> pagedList, Runnable runnable) {
+        mDiffer.submitList(pagedList, runnable);
+    }
+
+    public void expand(Collection<ExpandedPosition> positions) {
+        for(ExpandedPosition expandedPosition : positions) {
+            this.expandedItems.add(expandedPosition.emailId);
+        }
     }
 
     class AbstractThreadItemViewHolder extends RecyclerView.ViewHolder {

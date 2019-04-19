@@ -19,14 +19,20 @@ import android.app.Application;
 import android.util.Log;
 import android.view.Menu;
 
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
+
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
 import androidx.paging.PagedList;
+import rs.ltt.android.entity.ExpandedPosition;
 import rs.ltt.android.entity.FullEmail;
 import rs.ltt.android.entity.MailboxOverwriteEntity;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
@@ -51,6 +57,10 @@ public class ThreadViewModel extends AndroidViewModel {
 
     private LiveData<MenuConfiguration> menuConfiguration;
 
+    public final AtomicBoolean jumpedToFirstUnread = new AtomicBoolean(false);
+
+    public final ListenableFuture<List<ExpandedPosition>> expandedPositions;
+
     public final HashSet<String> expandedItems = new HashSet<>();
 
 
@@ -59,10 +69,11 @@ public class ThreadViewModel extends AndroidViewModel {
         this.threadId = threadId;
         this.label = label;
         this.threadRepository = new ThreadRepository(application);
-        this.threadRepository.markRead(threadId);
         this.header = this.threadRepository.getThreadHeader(threadId);
         this.emails = this.threadRepository.getEmails(threadId);
         this.mailboxes = this.threadRepository.getMailboxes(threadId);
+        this.expandedPositions = this.threadRepository.getExpandedPositions(threadId);
+        this.expandedPositions.addListener(()-> this.threadRepository.markRead(threadId),MoreExecutors.directExecutor());
 
         LiveData<List<MailboxOverwriteEntity>> overwriteEntityLiveData = this.threadRepository.getMailboxOverwrites(threadId);
 

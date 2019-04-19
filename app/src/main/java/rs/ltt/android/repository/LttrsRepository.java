@@ -60,7 +60,7 @@ public abstract class LttrsRepository {
 
     protected final Mua mua;
 
-    private final Executor ioExecutor = Executors.newSingleThreadExecutor();
+    protected final Executor ioExecutor = Executors.newSingleThreadExecutor();
 
 
     public LttrsRepository(Application application) {

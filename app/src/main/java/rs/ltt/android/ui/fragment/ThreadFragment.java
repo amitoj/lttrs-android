@@ -17,6 +17,7 @@ package rs.ltt.android.ui.fragment;
 
 import android.app.Application;
 import android.os.Bundle;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,17 +25,27 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.common.util.concurrent.MoreExecutors;
+
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.paging.PagedList;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.FragmentThreadBinding;
+import rs.ltt.android.entity.ExpandedPosition;
+import rs.ltt.android.entity.FullEmail;
+import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.android.ui.adapter.OnFlaggedToggled;
 import rs.ltt.android.ui.adapter.ThreadAdapter;
 import rs.ltt.android.ui.model.ThreadViewModel;
@@ -42,7 +53,9 @@ import rs.ltt.android.ui.model.ThreadViewModelFactory;
 
 public class ThreadFragment extends Fragment implements OnFlaggedToggled {
 
+    private FragmentThreadBinding binding;
     private ThreadViewModel threadViewModel;
+    private ThreadAdapter threadAdapter;
 
     private ThreadViewModel.MenuConfiguration menuConfiguration = ThreadViewModel.MenuConfiguration.none();
 
@@ -62,12 +75,12 @@ public class ThreadFragment extends Fragment implements OnFlaggedToggled {
         final String threadId = arguments.getThread();
         final String label = arguments.getLabel();
         threadViewModel = ViewModelProviders.of(this, new ThreadViewModelFactory(application, threadId, label)).get(ThreadViewModel.class);
-        FragmentThreadBinding binding = DataBindingUtil.inflate(inflater, R.layout.fragment_thread, container, false);
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_thread, container, false);
 
         //do we want a custom layout manager that does *NOT* remember scroll position when more
         //than one item is expanded. with variable sized items this might be annoying
 
-        final ThreadAdapter threadAdapter = new ThreadAdapter(threadViewModel.expandedItems);
+        threadAdapter = new ThreadAdapter(threadViewModel.expandedItems);
 
         //the default change animation causes UI glitches when expanding or collapsing item
         //for now it's better to just disable it. In the future we may write our own animator
@@ -77,7 +90,7 @@ public class ThreadFragment extends Fragment implements OnFlaggedToggled {
         }
 
         binding.list.setAdapter(threadAdapter);
-        threadViewModel.getEmails().observe(this, threadAdapter::submitList);
+        threadViewModel.getEmails().observe(this, this::onEmailsChanged);
         threadViewModel.getHeader().observe(this, threadAdapter::setThreadHeader);
         threadViewModel.getMenuConfiguration().observe(this, menuConfiguration -> {
             this.menuConfiguration = menuConfiguration;
@@ -85,6 +98,25 @@ public class ThreadFragment extends Fragment implements OnFlaggedToggled {
         });
         threadAdapter.setOnFlaggedToggledListener(this);
         return binding.getRoot();
+    }
+
+    private void onEmailsChanged(PagedList<FullEmail> fullEmails) {
+        if (threadViewModel.jumpedToFirstUnread.compareAndSet(false, true)) {
+            threadViewModel.expandedPositions.addListener(() -> {
+                try {
+                    List<ExpandedPosition> expandedPositions = threadViewModel.expandedPositions.get();
+                    threadAdapter.expand(expandedPositions);
+                    threadAdapter.submitList(fullEmails, () -> {
+                        final int pos = expandedPositions.get(0).position;
+                        binding.list.scrollToPosition(pos == 0 ? 0 : pos + 1);
+                    });
+                } catch (Exception e) {
+
+                }
+            }, MoreExecutors.directExecutor());
+        } else {
+            threadAdapter.submitList(fullEmails);
+        }
     }
 
     @Override

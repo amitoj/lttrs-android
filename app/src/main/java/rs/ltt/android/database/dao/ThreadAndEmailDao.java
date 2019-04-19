@@ -17,6 +17,8 @@ package rs.ltt.android.database.dao;
 
 import android.util.Log;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
 import java.util.List;
 
 import androidx.lifecycle.LiveData;
@@ -36,6 +38,7 @@ import rs.ltt.android.entity.EmailWithKeywords;
 import rs.ltt.android.entity.EmailWithMailboxes;
 import rs.ltt.android.entity.EntityStateEntity;
 import rs.ltt.android.entity.EntityType;
+import rs.ltt.android.entity.ExpandedPosition;
 import rs.ltt.android.entity.FullEmail;
 import rs.ltt.android.entity.ThreadEntity;
 import rs.ltt.android.entity.ThreadHeader;
@@ -43,7 +46,6 @@ import rs.ltt.android.entity.ThreadItemEntity;
 import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.common.entity.Thread;
 import rs.ltt.jmap.common.entity.TypedState;
-import rs.ltt.jmap.mua.cache.CacheConflictException;
 import rs.ltt.jmap.mua.cache.Missing;
 import rs.ltt.jmap.mua.cache.Update;
 
@@ -172,6 +174,16 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
     @Transaction
     @Query("select subject,email.threadId from thread_item join email on thread_item.emailId=email.id where thread_item.threadId=:threadId order by position limit 1")
     public abstract LiveData<ThreadHeader> getThreadHeader(String threadId);
+
+
+    @Query("select position,emailId from thread_item where threadId=:threadId and thread_item.emailId not in (select thread_item.emailId from thread_item join email_keyword on thread_item.emailId=email_keyword.emailId where threadId=:threadId and email_keyword.keyword='$seen') order by position")
+    public abstract ListenableFuture<List<ExpandedPosition>> getUnseenPositions(String threadId);
+
+    @Query("select position,emailId from thread_item where threadId=:threadId order by position")
+    public abstract ListenableFuture<List<ExpandedPosition>> getAllPositions(String threadId);
+
+    @Query("select position,emailId from thread_item where threadId=:threadId order by position desc limit 1")
+    public abstract ListenableFuture<List<ExpandedPosition>> getMaxPosition(String threadId);
 
     @Query("delete from email")
     abstract void deleteAllEmail();
