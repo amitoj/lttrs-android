@@ -40,7 +40,7 @@ android {
 dependencies {
 
     def lifecycle_version = "2.2.0-alpha03"
-    def nav_version = "2.0.0"
+    def nav_version = "2.2.0-alpha01"
     def paging_version = "2.1.0"
     def recycler_view_version = "1.1.0-beta03"
     def recycler_view_selection_version = "1.1.0-alpha06"
