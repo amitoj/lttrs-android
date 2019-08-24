@@ -43,11 +43,11 @@ import rs.ltt.android.worker.MoveToTrashWorker;
 import rs.ltt.android.worker.MuaWorker;
 import rs.ltt.android.worker.RemoveFromMailboxWorker;
 import rs.ltt.jmap.client.session.SessionFileCache;
-import rs.ltt.jmap.common.entity.EmailQuery;
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
 import rs.ltt.jmap.common.entity.Keyword;
 import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
+import rs.ltt.jmap.common.entity.query.EmailQuery;
 import rs.ltt.jmap.mua.Mua;
 
 public abstract class LttrsRepository {

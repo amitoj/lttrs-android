@@ -25,9 +25,9 @@ import rs.ltt.android.Credentials;
 import rs.ltt.android.database.LttrsDatabase;
 import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.android.entity.ThreadOverviewItem;
-import rs.ltt.jmap.common.entity.EmailQuery;
 import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
+import rs.ltt.jmap.common.entity.query.EmailQuery;
 
 public class MailboxQueryViewModel extends AbstractQueryViewModel {
 

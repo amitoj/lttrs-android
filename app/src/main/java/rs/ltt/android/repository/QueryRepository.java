@@ -48,10 +48,10 @@ import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.android.worker.ModifyKeywordWorker;
 import rs.ltt.jmap.client.session.SessionFileCache;
-import rs.ltt.jmap.common.entity.EmailQuery;
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
 import rs.ltt.jmap.common.entity.Keyword;
 import rs.ltt.jmap.common.entity.Role;
+import rs.ltt.jmap.common.entity.query.EmailQuery;
 import rs.ltt.jmap.mua.Mua;
 
 public class QueryRepository extends LttrsRepository {
@@ -73,6 +73,7 @@ public class QueryRepository extends LttrsRepository {
                 .setBoundaryCallback(new PagedList.BoundaryCallback<ThreadOverviewItem>() {
                     @Override
                     public void onZeroItemsLoaded() {
+                        Log.d("lttrs","onZeroItemsLoaded");
                         requestNextPage(query, null); //conceptually in terms of loading indicators this is more of a page request
                         super.onZeroItemsLoaded();
                     }

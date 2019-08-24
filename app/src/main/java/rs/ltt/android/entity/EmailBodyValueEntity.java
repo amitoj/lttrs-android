@@ -30,7 +30,8 @@ import rs.ltt.jmap.common.entity.EmailBodyValue;
         primaryKeys = {"emailId", "partId"},
         foreignKeys = @ForeignKey(entity = EmailEntity.class,
                 parentColumns = {"id"},
-                childColumns = {"emailId"}
+                childColumns = {"emailId"},
+                onDelete = ForeignKey.CASCADE
         )
 )
 public class EmailBodyValueEntity {

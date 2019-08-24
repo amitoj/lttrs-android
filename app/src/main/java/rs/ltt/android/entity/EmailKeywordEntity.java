@@ -26,14 +26,12 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import rs.ltt.jmap.common.entity.Email;
 
-import static androidx.room.ForeignKey.CASCADE;
-
 @Entity(tableName = "email_keyword",
         primaryKeys = {"emailId", "keyword"},
         foreignKeys = @ForeignKey(entity = EmailEntity.class,
                 parentColumns = {"id"},
                 childColumns = {"emailId"},
-                onDelete = CASCADE
+                onDelete = ForeignKey.CASCADE
         )
 )
 public class EmailKeywordEntity {

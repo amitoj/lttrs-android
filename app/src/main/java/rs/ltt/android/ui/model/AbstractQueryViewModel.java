@@ -33,8 +33,8 @@ import rs.ltt.android.entity.KeywordOverwriteEntity;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.android.repository.QueryRepository;
 import rs.ltt.android.worker.ModifyKeywordWorker;
-import rs.ltt.jmap.common.entity.EmailQuery;
 import rs.ltt.jmap.common.entity.Keyword;
+import rs.ltt.jmap.common.entity.query.EmailQuery;
 
 public abstract class AbstractQueryViewModel extends AndroidViewModel {
 
