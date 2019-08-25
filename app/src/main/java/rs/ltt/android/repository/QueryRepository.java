@@ -18,41 +18,24 @@ package rs.ltt.android.repository;
 import android.app.Application;
 import android.util.Log;
 
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.MoreExecutors;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.paging.LivePagedListBuilder;
 import androidx.paging.PagedList;
-import androidx.work.Constraints;
-import androidx.work.Data;
-import androidx.work.ExistingWorkPolicy;
-import androidx.work.NetworkType;
-import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkManager;
-import rs.ltt.android.Credentials;
-import rs.ltt.android.cache.DatabaseCache;
-import rs.ltt.android.database.LttrsDatabase;
-import rs.ltt.android.entity.KeywordOverwriteEntity;
-import rs.ltt.android.entity.MailboxOverviewItem;
+
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+
 import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.entity.ThreadOverviewItem;
-import rs.ltt.android.worker.ModifyKeywordWorker;
-import rs.ltt.jmap.client.session.SessionFileCache;
-import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
-import rs.ltt.jmap.common.entity.Keyword;
 import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
-import rs.ltt.jmap.mua.Mua;
 
 public class QueryRepository extends LttrsRepository {
 

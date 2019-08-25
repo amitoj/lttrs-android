@@ -120,22 +120,24 @@ public class BindingAdapters {
 
     @BindingAdapter("from")
     public static void setFrom(final TextView textView, final ThreadOverviewItem.From[] from) {
-        final boolean shorten = from.length > 1;
         final SpannableStringBuilder builder = new SpannableStringBuilder();
-        for (int i = 0; i < from.length; ++i) {
-            ThreadOverviewItem.From individual = from[i];
-            if (builder.length() != 0) {
-                builder.append(", ");
-            }
-            int start = builder.length();
-            builder.append(shorten ? EmailAddressUtil.shorten(individual.name) : individual.name);
-            if (!individual.seen) {
-                builder.setSpan(new StyleSpan(Typeface.BOLD), start, builder.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            }
-            if (from.length > 3) {
-                if (i < from.length - 3) {
-                    builder.append(" … "); //TODO small?
-                    i = from.length - 3;
+        if (from != null) {
+            final boolean shorten = from.length > 1;
+            for (int i = 0; i < from.length; ++i) {
+                ThreadOverviewItem.From individual = from[i];
+                if (builder.length() != 0) {
+                    builder.append(", ");
+                }
+                int start = builder.length();
+                builder.append(shorten ? EmailAddressUtil.shorten(individual.name) : individual.name);
+                if (!individual.seen) {
+                    builder.setSpan(new StyleSpan(Typeface.BOLD), start, builder.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+                if (from.length > 3) {
+                    if (i < from.length - 3) {
+                        builder.append(" … "); //TODO small?
+                        i = from.length - 3;
+                    }
                 }
             }
         }
